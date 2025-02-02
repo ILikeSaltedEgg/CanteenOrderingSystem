@@ -1,0 +1,262 @@
+.container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+    background: rgb(255, 255, 255);
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    color: #333;
+    font-family: Arial, sans-serif;
+}
+
+#logo {
+    height: 150px; 
+    width: auto;
+    margin: 0 auto; 
+    display: block; 
+}
+
+.terms-container h1 {
+    text-align: center;
+    font-size: 28px;
+    color: #2c3e50;
+    margin-bottom: 20px;
+}
+
+.terms-container h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: #34495e;
+    text-decoration: underline;
+}
+
+.terms-container p {
+    font-size: 16px;
+    line-height: 1.7;
+    margin-bottom: 20px;
+}
+
+.terms-container a {
+    color: #2980b9;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.terms-container a:hover {
+    text-decoration: underline;
+}
+
+.contact-container {
+    margin-top: 40px;
+    padding: 20px;
+    background-color: rgba(46, 204, 113, 0.1);
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.contact-container h3 {
+    font-size: 22px;
+    color: #27ae60;
+    margin-bottom: 15px;
+}
+
+.contact-container p {
+    font-size: 16px;
+    color: #2c3e50;
+}
+
+.contact-container a {
+    font-weight: normal;
+    color: #27ae60;
+}
+
+.contact-container a:hover {
+    text-decoration: underline;
+}
+
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.contact-form input,
+.contact-form textarea {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+    width: 100%;
+}
+
+.contact-form input[type="submit"] {
+    background-color: #27ae60;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.contact-form input[type="submit"]:hover {
+    background-color: #2ecc71;
+}
+
+.terms-footer {
+    text-align: center;
+    font-size: 14px;
+    color: #7f8c8d;
+    margin-top: 50px;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; 
+}
+
+footer {
+    width: 102%;
+    background: rgba(62, 94, 190, 0.85); 
+    color: #fff;
+    text-align: center;
+    padding: 10px 0; 
+    font-size: 14px;
+    border-top: 3px solid rgba(0, 86, 179, 0.6);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative; 
+    bottom: 0;
+}
+
+
+.footer-container {
+    width: 100%; 
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 15px;
+}
+
+.footer-container p {
+    margin: 5px 0;
+    font-size: 16px;
+    opacity: 0.9;
+}
+
+.footer-links {
+    display: flex;
+    gap: 15px;
+}
+
+.footer-links a {
+    color: #e3eafc;
+    text-decoration: none;
+    font-size: 16px;
+    transition: color 0.3s;
+}
+
+.footer-links a:hover {
+    color: #fff;
+}
+
+.social-icons {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.social-icons a img {
+    width: 20px;
+    height: auto; 
+    transition: transform 0.3s;
+}
+
+.social-icons a:hover img {
+    transform: scale(1.1); 
+}
+
+.contact-container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.7);
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    color: black;
+}
+
+.contact-container h1 {
+    text-align: center;
+    font-size: 32px;
+    margin-bottom: 20px;
+}
+
+.contact-container h2 {
+    font-size: 24px;
+    margin-top: 20px;
+}
+
+.contact-container p {
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+.contact-form .form-group {
+    margin-bottom: 20px;
+}
+
+.contact-form label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.contact-form input, .contact-form textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.contact-form textarea {
+    resize: vertical;
+}
+
+.submit-button {
+    display: inline-block;
+    background-color: #3f52bd;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.submit-button:hover {
+    background-color: #3f52bd;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+ul li {
+    margin-bottom: 10px;
+}
+
+ul li a {
+    color: #3f52bd;
+    text-decoration: none;
+}
+
+ul li a:hover {
+    text-decoration: underline;
+}
+
