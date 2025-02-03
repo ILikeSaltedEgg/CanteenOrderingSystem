@@ -31,5 +31,3 @@ The **Online Canteen Ordering System** is a web-based platform designed to strea
 This project is for educational purposes only.  
 
 ---
-
-If you have any questions or issues, feel free to reach out!
