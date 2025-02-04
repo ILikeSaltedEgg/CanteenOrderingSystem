@@ -16,7 +16,7 @@ body {
 }
 
 .top-header {
-    background-color: rgba(34, 59, 141, 0.7);
+    background: linear-gradient(135deg, rgba(34, 59, 141, 0.9), rgba(52, 86, 189, 0.9));
     color: white;
     padding: 30px 40px;
     text-align: center;
@@ -25,43 +25,81 @@ body {
     position: fixed;
     top: 0;
     left: 0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    backdrop-filter: blur(8px); /* Adds a frosted glass effect */
+    transition: all 0.3s ease-in-out; /* Smooth transitions for hover effects */
+}
+
+.top-header:hover {
+    background: linear-gradient(135deg, rgba(34, 59, 141, 1), rgba(52, 86, 189, 1));
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.9);
 }
 
 .top-header h1 {
     margin: 0;
-    font-size: 36px;
-    font-weight: bold;
-    letter-spacing: 1px;
+    font-size: 42px; /* Slightly larger for emphasis */
+    font-weight: 800; /* Bolder font weight */
+    letter-spacing: 2px;
+    text-transform: uppercase; /* Uppercase for a modern look */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern font stack */
+    background: linear-gradient(45deg, #ffffff, #e0e0e0); /* Gradient text effect */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: glow 2s infinite alternate; /* Adds a glowing effect */
+}
+
+@keyframes glow {
+    0% {
+        text-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
+    }
+    100% {
+        text-shadow: 0 0 20px rgba(255, 255, 255, 1);
+    }
 }
 
 #logo {
-    height: 60px;
+    height: 70px;
     width: auto;
-    margin-right: 20px;
+    position: absolute; 
+    left: 20px; 
+    top: 50%; 
+    transform: translateY(-50%); 
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.6)); /* Adds a subtle glow to the logo */
+    transition: transform 0.3s ease-in-out; /* Smooth hover effect */
 }
 
 .top-header h2 {
-    margin: 5px 0 0;
-    font-size: 24px;
-    font-weight: normal;
+    margin: 10px 0 0; /* Adjusted margin for better spacing */
+    font-size: 26px; /* Slightly larger for readability */
+    font-weight: 300; /* Lighter font weight for contrast */
+    font-style: italic; /* Italicized for a sleek look */
+    color: rgba(255, 255, 255, 0.9); /* Slightly transparent for a modern feel */
+    letter-spacing: 1px;
 }
 
 #container {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: rgba(255, 255, 255, 0.9); /* Slightly more opaque for better readability */
     padding: 40px;
-    border-radius: 12px;
+    border-radius: 16px; /* Increased border radius for a softer look */
     width: 100%;
     max-width: 450px;
     margin-top: 120px;
-    box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.2);
+    box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.25); /* Deeper shadow for a floating effect */
+    backdrop-filter: blur(8px); /* Adds a frosted glass effect */
+    border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border for depth */
+    transition: all 0.3s ease-in-out; /* Smooth transitions for hover effects */
+}
+
+#container:hover {
+    box-shadow: 0px 12px 32px rgba(0, 0, 0, 0.3); /* Enhanced shadow on hover */
+    transform: translateY(-5px); /* Slight lift on hover */
 }
 
 .box-content {
@@ -71,8 +109,11 @@ body {
 
 .box-content h2 {
     margin-top: 0;
-    font-size: 28px;
-    color: #333;
+    font-size: 32px; /* Larger font size for emphasis */
+    color: #222; /* Darker color for better contrast */
+    font-weight: 700; /* Bolder font weight */
+    letter-spacing: 0.5px; /* Slight letter spacing for a modern touch */
+    margin-bottom: 20px; /* Added margin for spacing */
 }
 
 .box-content label {
@@ -80,24 +121,27 @@ body {
     margin-top: 15px;
     text-align: left;
     font-weight: 600;
-    color: #333;
+    color: #444; /* Slightly darker for better readability */
+    font-size: 16px; /* Slightly larger font size */
 }
 
 .box-content input {
     width: 100%;
-    padding: 12px;
+    padding: 14px; /* Slightly more padding for better touch interaction */
     margin: 10px 0 20px;
     border: 1px solid #ddd;
-    border-radius: 8px;
+    border-radius: 10px; /* Increased border radius for consistency */
     box-sizing: border-box;
     font-size: 16px;
     transition: all 0.3s ease;
+    background-color: rgba(255, 255, 255, 0.9); /* Slightly transparent background */
 }
 
 .box-content input:focus {
     outline: none;
     border-color: #6c63ff;
-    box-shadow: 0 0 8px rgba(108, 99, 255, 0.7);
+    box-shadow: 0 0 12px rgba(108, 99, 255, 0.8); /* Enhanced glow effect */
+    background-color: white; /* Solid background on focus */
 }
 
 .checkbox-container {
@@ -106,18 +150,23 @@ body {
     margin-bottom: 20px;
     font-size: 14px;
     font-weight: 16px;
-    color: #333;
+    color: #444; /* Slightly darker for better readability */
     cursor: pointer;
 }
 
 .checkbox-container input[type="checkbox"] {
-    width: 15px;
-    height: 15px;
+    width: 16px; /* Slightly larger checkbox */
+    height: 16px;
     margin-right: 8px;
     accent-color: #6c63ff;
     cursor: pointer;
     display: inline-block;
     vertical-align: middle;
+    transition: all 0.3s ease; /* Smooth transition for hover effects */
+}
+
+.checkbox-container input[type="checkbox"]:hover {
+    transform: scale(1.1); /* Slightly enlarges the checkbox on hover */
 }
 
 .checkbox-container label {
@@ -125,33 +174,37 @@ body {
     cursor: pointer;
     transition: color 0.3s ease;
     display: inline-block;
-    line-height: 1; 
-    vertical-align: middle; 
-    padding-top: 2px; 
+    line-height: 1;
+    vertical-align: middle;
+    padding-top: 2px;
 }
 
 .checkbox-container:hover label {
     color: #6c63ff;
 }
 
-
 .submit-button {
     background: linear-gradient(135deg, #2850a7, #293eb4);
     color: white;
-    padding: 14px;
+    padding: 16px; /* Slightly more padding for better interaction */
     border: none;
-    border-radius: 8px;
+    border-radius: 10px; /* Increased border radius for consistency */
     cursor: pointer;
     width: 100%;
     font-size: 18px;
+    font-weight: 600; /* Bolder font weight */
+    letter-spacing: 0.5px; /* Slight letter spacing for a modern touch */
     transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
 }
 
 .submit-button:hover {
     background: linear-gradient(135deg, #215188, #293eb4);
     transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3); /* Enhanced shadow on hover */
 }
 
 .submit-button:active {
     transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* Reset shadow on active */
 }

@@ -293,6 +293,26 @@ button:disabled {
     transition: background-color 0.3s ease;
 }
 
+#Canteen-buttons {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.Canteen-buttons {
+    padding: 10px 15px;
+    margin: 0 5px;
+    background-color: #215188;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.Canteen-buttons:hover {
+    background-color: #a00;
+}
+
 
 #category-buttons {
     margin-bottom: 20px;

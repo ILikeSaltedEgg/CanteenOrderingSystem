@@ -14,6 +14,52 @@ body {
     padding: 20px;
 }
 
+.food-items-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+.food-items-list li {
+    margin: 5px 0;
+}
+.view-details-button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+.view-details-button:hover {
+    background-color: #45a049;
+}
+
+.accept-button {
+background-color: #4CAF50;
+color: white;
+border: none;
+padding: 5px 10px;
+border-radius: 4px;
+cursor: pointer;
+}
+
+.accept-button:hover {
+    background-color: #45a049;
+}
+
+.delete-button {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.delete-button:hover {
+    background-color: #e53935;
+}
+
 .staff-header {
     background-color: #0056b3;
     color: #fff;
