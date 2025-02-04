@@ -1,3 +1,18 @@
+body {
+    font-family: Arial, sans-serif;
+    margin-top: 80px;
+    padding: 20px; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background: rgb(50,122,163);
+    background: linear-gradient(90deg, rgba(50,122,163,1) 21%, rgba(97,132,168,1) 80%);
+    background-repeat: no-repeat;
+    background-size: cover;
+    box-sizing: border-box;
+}
+
 .top-header {
     background-color: rgba(62, 94, 190, 0.7);
     color: white;
