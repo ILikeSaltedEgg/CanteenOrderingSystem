@@ -45,11 +45,34 @@ if (!$users_result) {
     die("Query failed: " . mysqli_error($conn));
 }
 
+// Fetch dashboard statistics
+$total_users_query = "SELECT COUNT(*) AS total_users FROM users";
+$total_users_result = mysqli_query($conn, $total_users_query);
+$total_users = mysqli_fetch_assoc($total_users_result)['total_users'];
+
+$online_users_query = "SELECT COUNT(*) AS online_users FROM users WHERE last_activity > NOW() - INTERVAL 5 MINUTE";
+$online_users_result = mysqli_query($conn, $online_users_query);
+$online_users = mysqli_fetch_assoc($online_users_result)['online_users'];
+
+$total_orders_query = "SELECT COUNT(*) AS total_orders FROM orders";
+$total_orders_result = mysqli_query($conn, $total_orders_query);
+$total_orders = mysqli_fetch_assoc($total_orders_result)['total_orders'];
+
 if (isset($_POST['validate_users'])) {
     $validate_query = "UPDATE users SET school_valid = CASE
                        WHEN username LIKE '%@arellano.edu%' THEN 1
                        ELSE 0 END";
     if (!mysqli_query($conn, $validate_query)) {
+        die("Validation query failed: " . mysqli_error($conn));
+    }
+    header("Location: super_admin.php");
+    exit();
+}
+
+if (isset($_POST['validate_user'])) {
+    $user_id = (int) $_POST['user_id'];
+    $validate_user_query = "UPDATE users SET school_valid = 1 WHERE id = '$user_id'";
+    if (!mysqli_query($conn, $validate_user_query)) {
         die("Validation query failed: " . mysqli_error($conn));
     }
     header("Location: super_admin.php");
@@ -105,11 +128,69 @@ if (isset($_GET['delete_user_id'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Super Admin Panel</title>
     <link rel="stylesheet" href="../../Styles/styles_admin.css">
+    <style>
+        .dashboard {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .dashboard-item {
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            flex: 1;
+            margin: 0 10px;
+        }
+        .dashboard-item h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #333;
+        }
+        .dashboard-item p {
+            margin: 10px 0 0;
+            font-size: 24px;
+            font-weight: bold;
+            color: #555;
+        }
+        .btn-validate-user {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-validate-user:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 <body>
     <div class="header">
         <h1>Super Admin Panel</h1>
         <a href="../../System/logout.php" class="logout">Logout</a>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="dashboard">
+        <div class="dashboard-item">
+            <h3>Total Users</h3>
+            <p><?php echo $total_users; ?></p>
+        </div>
+        <div class="dashboard-item">
+            <h3>Online Users</h3>
+            <p><?php echo $online_users; ?></p>
+        </div>
+        <div class="dashboard-item">
+            <h3>Total Orders</h3>
+            <p><?php echo $total_orders; ?></p>
+        </div>
     </div>
 
     <div class="container">
@@ -126,6 +207,7 @@ if (isset($_GET['delete_user_id'])) {
                         <th>User Type</th>
                         <th>Section</th>
                         <th>Valid</th>
+                        <th>Validate</th>
                         <th>Created At</th>
                         <th>Actions</th>
                     </tr>
@@ -138,6 +220,12 @@ if (isset($_GET['delete_user_id'])) {
                             <td><?php echo htmlspecialchars($user['usertype']); ?></td>
                             <td><?php echo htmlspecialchars($user['section']); ?></td>
                             <td><?php echo $user['school_valid'] ? 'Yes' : 'No'; ?></td>
+                            <td>
+                                <form method="POST" action="" style="display: inline;">
+                                    <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
+                                    <button type="submit" name="validate_user" class="btn-validate-user">Validate</button>
+                                </form>
+                            </td>
                             <td><?php echo htmlspecialchars($user['created_at']); ?></td>
                             <td>
                                 <a href="super_admin.php?delete_user_id=<?php echo $user['id']; ?>" class="btn-delete">Remove</a>
