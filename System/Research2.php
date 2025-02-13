@@ -107,6 +107,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
             }
             ?>
         </div>
+
+        <a href="cart.php" id="cart-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="9" cy="21" r="1"></circle>
+                <circle cx="20" cy="21" r="1"></circle>
+                <path d="M1 1h4l2 13h13l2-7H6"></path>
+            </svg>
+        </a>
+
+
+
         <svg id="hamburger" class="Header__toggle-svg" viewBox="0 0 60 40" width="40" height="40">
             <g stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
                 <path id="top-line" d="M10,10 L50,10 Z"></path>
@@ -131,11 +142,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
         <button class="Canteen-button" onclick="filterItems('Canteen 1')">Canteen 1</button>
         <button class="Canteen-button" onclick="filterItems('Canteen 2')">Canteen 2</button>
         <button class="Canteen-button" onclick="filterItems('Canteen 3')">Canteen 3</button>
-        <button class="Canteen-button" onclick="filterItems('all')">All</button>
         </section>
 
         <section id="category-buttons">
-        <button class="category-button" onclick="filterItems(currentCanteen, 'all')">All</button>
+        <button class="category-button" onclick="filterItems('all')">All</button>
         <button class="category-button" onclick="filterItems(currentCanteen, 'meals')">Meals</button>
         <button class="category-button" onclick="filterItems(currentCanteen, 'snacks')">Snacks</button>
         <button class="category-button" onclick="filterItems(currentCanteen, 'drinks')">Drinks</button>
@@ -186,7 +196,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
                     </div>
                 </div>
 
-                <div class="menu-item" data-category="snacks" data-canteen="Canteen 1">
+                <div class="menu-item" data-category="snacks" data-canteen="Canteen 2">
                     <img src="https://luckyme.ph/img/products/webp/2023_0418_LuckyMe_EHC_75g_Mockup_1stPass.webp" alt="Pancit Canton">
                     <h3>Pancit Canton</h3>
                     <p>Price: ₱25</p>
@@ -390,15 +400,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
 
                     <div class="button-group">
                         <button type="submit">Pay Now</button>
-                    </div>
+                    </div>  
 
                     <script>
                     function submitPayment() {
-                        const cart = [
-                            { name: 'Food 1', price: 50, quantity: 2 },
-                            { name: 'Food 2', price: 30, quantity: 1 }
-                        ];
-                        const totalAmount = 130;
 
                         const form = document.createElement('form');
                         form.method = 'POST';
@@ -429,23 +434,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
         </div>
     </main>
 
-    <footer>
-    <div class="footer-container">
-        <p>&copy; 2025 Arellano University. All Rights Reserved.</p>
-        <div class="footer-links">
-            <a href="policy.php">Privacy Policy</a> |
-            <a href="terms.php">Terms of Service</a> |
-            <a href="contact.php">Contact Us</a>
-        </div>
-        <div class="social-icons">
-            <a href="https://www.facebook.com/ace.joshua.calimlim/" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/2021_Facebook_icon.svg/1200px-2021_Facebook_icon.svg.png" alt="Facebook"></a>
-            <a href="https://x.com/omphukos" target="_blank"><img src="https://static.vecteezy.com/system/resources/previews/031/737/215/non_2x/twitter-new-logo-twitter-icons-new-twitter-logo-x-2023-x-social-media-icon-free-png.png" alt="Twitter"></a>
-            <a href="https://www.instagram.com/ace_je_taime/" target="_blank"><img src="https://static.vecteezy.com/system/resources/previews/018/930/415/non_2x/instagram-logo-instagram-icon-transparent-free-png.png" alt="Instagram"></a>
-        </div>
-        </div>
-    </footer>
-
-
     <script>
         function filterItems(category) {
             const items = document.querySelectorAll('.menu-item');
@@ -459,6 +447,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
         }
     </script>
     <script src="../JsSystem/script1.js"></script>
+
+    <?php include 'footer.php'; ?>
+    
 </body>
 
 </html>

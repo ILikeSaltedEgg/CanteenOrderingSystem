@@ -14,12 +14,46 @@
 </head>
 <body>
 
-    <?php include('header.php'); ?>
+    <div class="top-header">
+        <a href="research1.php">
+        <img src="https://upload.wikimedia.org/wikipedia/en/thumb/8/8b/Arellano_University_logo.png/200px-Arellano_University_logo.png" alt="Logo" id="logo">
+        </a>
+        <h1>Arellano University Jose Rizal Campus</h1>
+        <h2>Online Canteen</h2>
+        <div id="auth-container">
+        <?php if (isset($_SESSION["usename"])): ?>
+
+            <?php
+            if (isset($_SESSION['username'])) {
+                echo '<span id="user-name"><span id="user-display-name">' . htmlspecialchars($_SESSION['username']) . '</span>!</span>';
+            } else {
+                echo '<span id="user-name">Welcome, Guest!</span>';
+            }
+            ?>
+                <!-- Show Logout Button -->
+                <a class="Header_toggle-svg" id="hamburger">
+                <svg id="hamburger" class="Header__toggle-svg" viewBox="0 0 60 40" width="40" height="40">
+                <g stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+                    <path id="top-line" d="M10,10 L50,10 Z"></path>
+                    <path id="middle-line" d="M10,20 L50,20 Z"></path>
+                    <path id="bottom-line" d="M10,30 L50,30 Z"></path>
+                </g>
+                </svg>
+                </a>
+            <?php else: ?>
+                <!-- Show Login Button -->
+                <a href="../Homepage/login.php" id="login-button">
+                    <button type="button">Login</button>
+                </a>
+            <?php endif; ?>
+        </div>
+    </div> 
 
     <section id="Canteen-buttons">
         <button class="Canteen-button" onclick="filterItems('Canteen 1')">Canteen 1</button>
         <button class="Canteen-button" onclick="filterItems('Canteen 2')">Canteen 2</button>
         <button class="Canteen-button" onclick="filterItems('Canteen 3')">Canteen 3</button>
+        <button class="Canteen-button" onclick="filterItems('all')">All</button>
         </section>
 
     <div id="category-buttons">
@@ -116,6 +150,21 @@
             
         </div>
 
+        <script>
+            
+            function checkLoginStatus() {
+                const userName = localStorage.getItem('userName');
+    
+                if (userName) {
+                
+                    document.getElementById('register-btn').style.display = 'none';
+                    document.getElementById('login-btn').style.display = 'none';
+                    document.getElementById('user-name').style.display = 'inline';
+                    document.getElementById('user-display-name').textContent = userName;
+                }
+            }
+
+        </script>
 
         <script>
             let isLoggedIn = false;
@@ -142,10 +191,24 @@
         </div>
 
     </div>
+
+    <footer>
+    <div class="footer-container">
+        <p>&copy; 2025 Arellano University. All Rights Reserved.</p>
+        <div class="footer-links">
+            <a href="policy.php">Privacy Policy</a> |
+            <a href="terms.php">Terms of Service</a> |
+            <a href="contact.php">Contact Us</a>
+        </div>
+        <div class="social-icons">
+            <a href="https://www.facebook.com/ace.joshua.calimlim/" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/2021_Facebook_icon.svg/1200px-2021_Facebook_icon.svg.png" alt="Facebook"></a>
+            <a href="https://x.com/omphukos" target="_blank"><img src="https://static.vecteezy.com/system/resources/previews/031/737/215/non_2x/twitter-new-logo-twitter-icons-new-twitter-logo-x-2023-x-social-media-icon-free-png.png" alt="Twitter"></a>
+            <a href="https://www.instagram.com/ace_je_taime/" target="_blank"><img src="https://static.vecteezy.com/system/resources/previews/018/930/415/non_2x/instagram-logo-instagram-icon-transparent-free-png.png" alt="Instagram"></a>
+        </div>
+        </div>
+    </footer>
     
     <script src="../JsSystem/script.js"></script>
-
-    <?php include 'footer.php'; 
-    ?>
 </body>
 </html>
+

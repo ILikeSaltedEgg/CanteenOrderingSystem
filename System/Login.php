@@ -17,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $pass = trim($_POST["password"]);
 
     if (empty($user) || empty($pass)) {
-        echo "<script>alert('Both username and password are required!'); window.location.href='Login.html';</script>";
+        echo "<script>alert('Both username and password are required!'); window.location.href='Login.php';</script>";
         exit();
     }
 
@@ -79,8 +79,9 @@ $conn->close();
     <div class="top-header">
         <h1>Arellano University Jose Rizal Campus</h1>
         <h2>Online Canteen</h2>
+        <a href="<?php echo isset($_SESSION['username']) ? 'research2.php' : 'research1.php'; ?>">
         <img src="https://upload.wikimedia.org/wikipedia/en/thumb/8/8b/Arellano_University_logo.png/200px-Arellano_University_logo.png" alt="Logo" id="logo">
-
+        </a>
     </div>
 
     <div id="container">

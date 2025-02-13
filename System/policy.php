@@ -1,9 +1,16 @@
+<?php session_start(); 
+
+include 'db_connection.php';
+
+?>
+
+
 <!DOCTYPE html>
-<html lang="en">
+< lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <a href="research2.php">
+    <a href="<?php echo isset($_SESSION['username']) ? 'research2.php' : 'research1.php'; ?>">
     <img src="https://upload.wikimedia.org/wikipedia/en/thumb/8/8b/Arellano_University_logo.png/200px-Arellano_University_logo.png" alt="Logo" id="logo">
     </a>
     <title>Privacy Policy</title>
@@ -70,20 +77,6 @@
 
 </body>
 
-<footer>
-    <div class="footer-container">
-        <p>&copy; 2025 Arellano University. All Rights Reserved.</p>
-        <div class="footer-links">
-            <a href="policy.php">Privacy Policy</a> |
-            <a href="terms.php">Terms of Service</a> |
-            <a href="contact.php">Contact Us</a>
-        </div>
-        <div class="social-icons">
-            <a href="https://www.facebook.com/ace.joshua.calimlim/" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/2021_Facebook_icon.svg/1200px-2021_Facebook_icon.svg.png" alt="Facebook"></a>
-            <a href="https://x.com/omphukos" target="_blank"><img src="https://static.vecteezy.com/system/resources/previews/031/737/215/non_2x/twitter-new-logo-twitter-icons-new-twitter-logo-x-2023-x-social-media-icon-free-png.png" alt="Twitter"></a>
-            <a href="https://www.instagram.com/ace_je_taime/" target="_blank"><img src="https://static.vecteezy.com/system/resources/previews/018/930/415/non_2x/instagram-logo-instagram-icon-transparent-free-png.png" alt="Instagram"></a>
-        </div>
-    </div>
-</footer>
+<?php include 'footer.php'; ?>
 
 </html>

@@ -28,7 +28,8 @@ $orderQuery = "
         o.order_id, 
         o.username, 
         o.order_date, 
-        o.total_price, 
+        o.total_price,
+        o.item_name, 
         o.order_status
     FROM 
         orders o

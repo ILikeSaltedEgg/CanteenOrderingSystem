@@ -1,4 +1,4 @@
-<?php 
+<?php
 session_start();
 
 if (!isset($_SESSION['usertype'])) {
@@ -8,10 +8,9 @@ if (!isset($_SESSION['usertype'])) {
 
 $user = [
     'username' => $_SESSION['username'] ?? 'Unknown User',
-    'section' => $_SESSION['section'] ?? 'Not Set', 
-    'usertype' => $_SESSION['usertype'] ?? 'user', 
+    'section' => $_SESSION['section'] ?? 'Not Set',
+    'usertype' => $_SESSION['usertype'] ?? 'user',
 ];
-
 
 if (!isset($_SESSION['email'])) {
     $_SESSION['email'] = 'sfDwG2024@yahoo.com';
@@ -44,8 +43,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
     <div class="dashboard-container">
-        <h1>Welcome, <?php echo htmlspecialchars($user['username']); ?>!</h1>
+    <a href="<?php echo isset($_SESSION['username']) ? 'research2.php' : 'research1.php'; ?>">
+    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/8/8b/Arellano_University_logo.png/200px-Arellano_University_logo.png" alt="Logo" id="logo">
+    </a>
+        <h1>Welcome, <?php echo htmlspecialchars($user['username']); ?>!</h1> 
         <h2>Dashboard / Profile</h2>
+
+        <svg id="hamburger" class="Header__toggle-svg" viewBox="0 0 60 40" width="40" height="40">
+        <g stroke="#007bff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+            <path id="top-line" d="M10,10 L50,10 Z"></path>
+            <path id="middle-line" d="M10,20 L50,20 Z"></path>
+            <path id="bottom-line" d="M10,30 L50,30 Z"></path>
+        </g>
+        </svg>
+
+        <nav id="menu-options" class="menu-options">
+            <a href="account.php">Account</a>
+            <a href="Research2.php">Home</a>
+            <a href="">Contact Staff</a>
+            <a href="logout.php">Logout</a>
+        </nav>
 
         <?php if (isset($_SESSION['message'])): ?>
             <div class="message">
@@ -62,19 +79,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </section>
 
         <section class="time-details">
-        <h3>Time Information</h3>
-        <p><strong>First Access:</strong><br> 
-            <?php 
-                echo date('l, d F Y, h:i A', $_SESSION['first_access'] ?? time()); 
-            ?>
-        </p>
-        <p><strong>Last Access:</strong><br> 
-            <?php 
-                echo date('l, d F Y, h:i A', $_SESSION['last_access'] ?? time()); 
-            ?>
-        </p>
+            <h3>Time Information</h3>
+            <p><strong>First Access:</strong><br> 
+                <?php echo date('l, d F Y, h:i A', $_SESSION['first_access'] ?? time()); ?>
+            </p>
+            <p><strong>Last Access:</strong><br> 
+                <?php echo date('l, d F Y, h:i A', $_SESSION['last_access'] ?? time()); ?>
+            </p>
         </section>
-
 
         <?php if ($_SESSION['usertype'] === 'user' || $_SESSION['usertype'] === 'admin'): ?>
             <section class="edit-profile">
@@ -103,25 +115,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </section>
     </div>
 
-    <svg id="hamburger" class="Header__toggle-svg" viewBox="0 0 60 40" width="40" height="40">
-        <g stroke="#007bff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
-            <path id="top-line" d="M10,10 L50,10 Z"></path>
-            <path id="middle-line" d="M10,20 L50,20 Z"></path>
-            <path id="bottom-line" d="M10,30 L50,30 Z"></path>
-        </g>
-    </svg>
-
-    <nav id="menu-options" class="menu-options">
-        <a href="account.php">Account</a>
-        <a href="Research2.php">Home</a>
-        <a href="">Contact Staff</a>
-        <a href="logout.php">Logout</a>
-    </nav>
-
     <script>
+
         document.getElementById("hamburger").addEventListener("click", function() {
-            document.getElementById("menu-options").classList.toggle("active");
+        document.getElementById("menu-options").classList.toggle("active");
         });
+
+        hamburgerMenu.addEventListener("click", () => {
+        menuOptions.classList.toggle("active");
+
+        const [topLine, middleLine, bottomLine] = [
+            document.getElementById("top-line"),
+            document.getElementById("middle-line"),
+            document.getElementById("bottom-line")
+        ];
+
+        if (menuOptions.classList.contains("active")) {
+            topLine.style.transform = "translateY(10px) rotate(45deg)";
+            middleLine.style.opacity = "0";
+            bottomLine.style.transform = "translateY(-10px) rotate(-45deg)";
+        } else {
+            topLine.style.transform = "translateY(0) rotate(0)";
+            middleLine.style.opacity = "1";
+            bottomLine.style.transform = "translateY(0) rotate(0)";
+        }
+    });
+
+    // Event listener to close the hamburger menu when clicking outside
+    document.addEventListener("click", (e) => {
+        if (!hamburgerMenu.contains(e.target) && !menuOptions.contains(e.target)) {
+            menuOptions.classList.remove("active");
+
+            document.getElementById("top-line").style.transform = "translateY(0) rotate(0)";
+            document.getElementById("middle-line").style.opacity = "1";
+            document.getElementById("bottom-line").style.transform = "translateY(0) rotate(0)";
+        }
+    });
     </script>
 </body>
 </html>
