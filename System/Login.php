@@ -94,9 +94,6 @@ $conn->close();
                 <label for="password">Password:</label>
                 <input type="password" id="password" name="password" placeholder="Enter your password" required>
 
-                <label for="section">Section:</label>
-                <input type="text" id="section" name="section" placeholder="Enter your section" required>
-
                 <div class="checkbox-container">
                     <input type="checkbox" id="stay-logged-in" name="stay-logged-in">
                     <label for="stay-logged-in">Remember Me</label>
