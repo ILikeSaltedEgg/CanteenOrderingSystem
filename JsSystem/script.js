@@ -28,6 +28,49 @@ document.addEventListener('DOMContentLoaded', function () {
         updateCartDisplay();
     };
 
+    const cartItems = [];
+    const cartList = document.querySelectorAll('#cart-items li');
+    cartList.forEach(item => {
+        const name = item.getAttribute('data-name');
+        const price = parseFloat(item.getAttribute('data-price'));
+        const quantity = parseInt(item.getAttribute('data-quantity'));
+        const canteen = item.getAttribute('data-canteen');
+        cartItems.push({ name, price, quantity, canteen});
+    });
+
+    // Create a hidden form to submit the order
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = formAction; // Set the form action dynamically
+
+    const cartInput = document.createElement('input');
+    cartInput.type = 'hidden';
+    cartInput.name = 'cart_items';
+    cartInput.value = JSON.stringify(cartItems);
+    form.appendChild(cartInput);
+
+    const canteenInput = document.createElement('input');
+    canteenInput.type = 'hidden';
+    canteenInput.name = 'canteen';
+    canteenInput.value = currentCanteen; // Include the selected canteen
+    form.appendChild(canteenInput);
+
+    const paymentMethodInput = document.createElement('input');
+    paymentMethodInput.type = 'hidden';
+    paymentMethodInput.name = 'payment_method'; // Ensure this matches the key in PHP
+    paymentMethodInput.value = selectedPaymentMethod;
+    form.appendChild(paymentMethodInput);
+
+    const totalAmountInput = document.createElement('input');
+    totalAmountInput.type = 'hidden';
+    totalAmountInput.name = 'total_amount';
+    totalAmountInput.value = totalAmount.toFixed(2);
+    form.appendChild(totalAmountInput);
+
+    document.body.appendChild(form);
+    form.submit();
+
+
     function updateCartDisplay() {
         const cartItemsContainer = document.getElementById("cart-items");
         const cartTotal = document.getElementById("cart-total");
@@ -56,29 +99,6 @@ document.addEventListener('DOMContentLoaded', function () {
         cart = [];
         updateCartDisplay();
     };
-
-    window.placeOrder = function () {
-        if (!localStorage.getItem("username")) {
-            alert("You need to be logged in to place an order.");
-            openBox('register');
-            return;
-        }
-
-        if (cart.length === 0) {
-            alert("Your cart is empty.");
-            return;
-        }
-
-        alert("Order placed successfully! Staff has been notified.");
-        clearCart();
-    };
-
-    function displayLoginAndRegisterButtons() {
-        authContainer.innerHTML = `
-            <button class="login-btn" onclick="location.href='login.php'">Login</button>
-            <button class="register-btn" onclick="location.href='register.php'">Register</button>
-        `;
-    }
 
     function displayLoggedInState() {
         const username = localStorage.getItem("username");
@@ -138,3 +158,75 @@ const filterCategory = (category) => {
         container.style.minHeight = `${container.offsetHeight}px`;
     }
 };
+
+// Function to get the selected payment method
+const getSelectedPaymentMethod = () => {
+    return Array.from(paymentOptions).find(option => option.checked)?.value || null;
+};
+
+// Event listener for removing items from the cart
+cartItemsContainer.addEventListener("click", (e) => {
+    if (e.target.classList.contains("remove-item")) {
+        const itemIndex = e.target.dataset.index;
+        totalAmount -= cart[itemIndex].price * cart[itemIndex].quantity;
+        cart.splice(itemIndex, 1);
+        updateCartDisplay();
+        showToast("Item removed from cart.");
+    }
+});
+
+// Event listener for the hamburger menu
+hamburgerMenu.addEventListener("click", () => {
+    menuOptions.classList.toggle("active");
+
+    const [topLine, middleLine, bottomLine] = [
+        document.getElementById("top-line"),
+        document.getElementById("middle-line"),
+        document.getElementById("bottom-line")
+    ];
+
+    if (menuOptions.classList.contains("active")) {
+        topLine.style.transform = "translateY(10px) rotate(45deg)";
+        middleLine.style.opacity = "0";
+        bottomLine.style.transform = "translateY(-10px) rotate(-45deg)";
+    } else {
+        topLine.style.transform = "translateY(0) rotate(0)";
+        middleLine.style.opacity = "1";
+        bottomLine.style.transform = "translateY(0) rotate(0)";
+    }
+});
+
+// Event listener to close the hamburger menu when clicking outside
+document.addEventListener("click", (e) => {
+    if (!hamburgerMenu.contains(e.target) && !menuOptions.contains(e.target)) {
+        menuOptions.classList.remove("active");
+
+        document.getElementById("top-line").style.transform = "translateY(0) rotate(0)";
+        document.getElementById("middle-line").style.opacity = "1";
+        document.getElementById("bottom-line").style.transform = "translateY(0) rotate(0)";
+    }
+});
+
+// Function to show a toast message
+const showToast = (message) => {
+    const toast = document.createElement("div");
+    toast.className = "toast";
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    setTimeout(() => toast.classList.add("show"), 100);
+    setTimeout(() => {
+        toast.classList.remove("show");
+        toast.remove();
+    }, 3000);
+};
+
+// Function to create a hidden input field
+const createHiddenInput = (name, value) => {
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = name;
+    input.value = value;
+    return input;
+};
+
