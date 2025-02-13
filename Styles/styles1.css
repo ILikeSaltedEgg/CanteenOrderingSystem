@@ -15,6 +15,16 @@ body {
     color: #fff;
 }
 
+@font-face {
+    font-family: 'TrajanPro';
+    src: url('../assets/fonts/TrajanPro-Regular.woff2') format('woff2'),
+         url('../assets/fonts/TrajanPro-Regular.woff') format('woff'),
+         url('../assets/fonts/TrajanPro-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+
 .top-header {
     background: linear-gradient(135deg, rgba(34, 59, 141, 0.9), rgba(52, 86, 189, 0.9));
     color: white;
@@ -45,7 +55,7 @@ body {
     font-weight: 800; /* Bolder font weight */
     letter-spacing: 2px;
     text-transform: uppercase; /* Uppercase for a modern look */
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern font stack */
+    font-family: "TrajanPro", serif; /* Modern font stack */
     background: linear-gradient(45deg, #ffffff, #e0e0e0); /* Gradient text effect */
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;

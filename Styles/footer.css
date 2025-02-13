@@ -1,0 +1,106 @@
+@font-face {
+    font-family: 'TrajanPro';
+    src: url('../assets/fonts/TrajanPro-Regular.woff2') format('woff2'),
+         url('../assets/fonts/TrajanPro-Regular.woff') format('woff'),
+         url('../assets/fonts/TrajanPro-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Footer */
+footer {
+    background-color: #222;
+    color: #fff;
+    padding: 40px 0;
+    width: 102%;
+    text-align: center;
+    font-size: 1rem;
+}
+
+.footer-container {
+    width: 80%;
+    margin: auto;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.footer-logo {
+    text-align: center;
+    font-family: "TrajanPro", serif;
+    font-style: normal;
+}
+
+.footer-logo img {
+    width: 80px;
+    margin-bottom: 10px;
+}
+
+.footer-logo h2 {
+    font-size: 1.5rem;
+    color: #13a2dc;
+    font-weight: normal;
+}
+
+.footer-links, .footer-contact, .footer-social {
+    flex: 1;
+    min-width: 200px;
+    text-align: center;
+}
+
+.footer-links ul {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-links li {
+    margin: 8px 0;
+}
+
+.footer-links a {
+    color: #ddd;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.footer-links a:hover {
+    color: #ff6f61;
+}
+
+.footer-contact p {
+    margin: 8px 0;
+}
+
+.footer-contact a {
+    color: #13a2dc;
+    text-decoration: none;
+}
+
+.footer-contact a:hover {
+    text-decoration: underline;
+}
+
+.footer-social a {
+    margin: 0 10px;
+    display: inline-block;
+    transition: transform 0.3s;
+}
+
+.footer-social img {
+    width: 30px;
+    height: 30px;
+}
+
+.footer-social a:hover {
+    transform: scale(1.1);
+}
+
+.footer-bottom {
+    margin-top: 20px;
+    font-size: 0.9rem;
+    opacity: 0.7;
+}

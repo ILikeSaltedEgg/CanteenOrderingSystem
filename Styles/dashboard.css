@@ -1,21 +1,41 @@
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
+    font-family: 'Arial', sans-serif;
     background: rgb(50,122,163);
     background: linear-gradient(90deg, rgba(50,122,163,1) 21%, rgba(97,132,168,1) 80%);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
 }
 
 .dashboard-container {
-    width: 100%;
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    position: relative;
+    position: relative; /* This makes sure the absolute positioning is relative to this container */
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    width: 90%;
+    max-width: 800px;
+    margin: 20px;
 }
+
+#logo {
+    position: absolute; /* Keeps it in the top-left of the dashboard container */
+    top: 20px;  /* Adjust for positioning */
+    left: 30px;
+    width: 50px; /* Reducing the size */
+    height: auto;
+}
+
+
+.logo img {
+    width: 100px; /* Reduce image size */
+    height: 30px;
+    object-fit: contain; /* Ensures the aspect ratio is maintained */
+}
+
 
 h1 {
     font-size: 32px;
@@ -64,8 +84,8 @@ strong {
 
 .Header__toggle-svg {
     position: absolute;
-    top: 20px; 
-    right: 20px; 
+    top: 10px;  /* Adjust to fit neatly inside */
+    right: 10px; /* Keeps it inside the container */
     z-index: 1001;
     cursor: pointer;
     width: 40px;
@@ -89,9 +109,9 @@ strong {
 }
 
 .menu-options {
-    position: fixed;
-    top: 70px;
-    right: 20px;
+    position: absolute; /* Change from fixed to absolute */
+    top: 50px; /* Position below the icon */
+    right: 10px; /* Adjust alignment */
     background-color: rgba(62, 94, 190, 0.95); 
     width: 220px; 
     display: flex;
@@ -134,4 +154,91 @@ strong {
 
 .menu-options a:not(:last-child) {
     margin-bottom: 8px; 
+}
+
+.message {
+    background: #d4edda;
+    color: #155724;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.user-details, .time-details, .edit-profile, .privacy-policy {
+    margin-bottom: 30px;
+}
+
+.user-details p, .time-details p {
+    font-size: 16px;
+    color: #555;
+    margin: 10px 0;
+}
+
+.edit-profile form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.edit-profile label {
+    font-size: 16px;
+    color: #333;
+    font-weight: bold;
+}
+
+.edit-profile input {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.edit-profile button {
+    background: #007bff;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.edit-profile button:hover {
+    background: #0056b3;
+}
+
+.privacy-policy p {
+    font-size: 14px;
+    color: #777;
+}
+
+@media (max-width: 768px) {
+
+    .logo {
+        width: 40px; /* Slightly smaller for mobile */
+        top: 10px;
+        left: 10px;
+    }
+    .dashboard-container {
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 24px;
+    }
+
+    h2 {
+        font-size: 20px;
+    }
+
+    h3 {
+        font-size: 18px;
+    }
+
+    .menu-options {
+        top: 60px;
+        right: 10px;
+    }
 }

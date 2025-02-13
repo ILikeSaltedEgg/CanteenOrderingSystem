@@ -4,6 +4,15 @@ html, body {
     padding: 0;
 }
 
+@font-face {
+    font-family: 'TrajanPro';
+    src: url('../assets/fonts/TrajanPro-Regular.woff2') format('woff2'),
+         url('../assets/fonts/TrajanPro-Regular.woff') format('woff'),
+         url('../assets/fonts/TrajanPro-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
 body {
     font-family: Arial, sans-serif;
     margin-top: 80px; 
@@ -38,6 +47,8 @@ body {
 
 .top-header h1 {
     margin: 0;
+    font-family: "TrajanPro", serif;
+    font-weight: normal;
     font-size: 25px;
     width: 100%;
 }
@@ -63,13 +74,31 @@ body {
     transform: translateY(-50%); 
 }
 
+#cart-icon {
+    position: absolute;
+    top: 25px;
+    right: 90px;
+    cursor: pointer;
+}
+
+#cart-icon svg {
+    width: 20px;
+    height: 30px;
+    transition: transform 0.2s ease-in-out;
+}
+
+#cart-icon:hover svg {
+    transform: scale(1.1);
+}
+
+
 #auth-container {
     display: flex;
     justify-content: flex-end;
     align-items: center;
     position: absolute;
     top: 35px; 
-    right: 100px;  
+    right: 140px;  
     gap: 10px; 
     color: white;
 }
@@ -166,6 +195,7 @@ body {
     width: 90%;
     max-width: 1200px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
 }
 
 #menu-items {
@@ -225,6 +255,7 @@ body {
     background-color: #fff;
     border-radius: 8px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
 }
 
 #cart-container h3 {
@@ -541,71 +572,6 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh; 
-}
-
-footer {
-    width: 102%;
-    background: rgba(62, 94, 190, 0.85); 
-    color: #fff;
-    text-align: center;
-    padding: 10px 0; 
-    font-size: 14px;
-    border-top: 3px solid rgba(0, 86, 179, 0.6);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    position: relative; 
-    bottom: 0;
-}
-
-
-.footer-container {
-    width: 100%; 
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 0 15px;
-}
-
-.footer-container p {
-    margin: 5px 0;
-    font-size: 16px;
-    opacity: 0.9;
-}
-
-.footer-links {
-    display: flex;
-    gap: 15px;
-}
-
-.footer-links a {
-    color: #e3eafc;
-    text-decoration: none;
-    font-size: 16px;
-    transition: color 0.3s;
-}
-
-.footer-links a:hover {
-    color: #fff;
-}
-
-.social-icons {
-    display: flex;
-    gap: 15px;
-    margin-top: 10px;
-}
-
-.social-icons a img {
-    width: 20px;
-    height: auto; 
-    transition: transform 0.3s;
-}
-
-.social-icons a:hover img {
-    transform: scale(1.1); 
 }
 
 .logout-message {
