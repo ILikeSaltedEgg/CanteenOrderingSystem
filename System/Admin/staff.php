@@ -1,9 +1,9 @@
-<?php 
+<?php
 session_start();
 
 $host = "127.0.0.1";
 $username = "root";
-$password = ""; 
+$password = "";
 $dbname = "au_canteen";
 
 $conn = new mysqli($host, $username, $password, $dbname);
@@ -22,15 +22,31 @@ if (isset($_GET['logout']) && $_GET['logout'] === 'true') {
     exit();
 }
 
+// Fetch order counts for the dashboard
+$statusCounts = [];
+$statusQuery = "
+    SELECT order_status, COUNT(*) AS count
+    FROM orders
+    GROUP BY order_status
+";
+$statusResult = $conn->query($statusQuery);
+if ($statusResult && $statusResult->num_rows > 0) {
+    while ($row = $statusResult->fetch_assoc()) {
+        $statusCounts[$row['order_status']] = $row['count'];
+    }
+}
+
 $orders = [];
+
 $orderQuery = "
     SELECT o.order_id, 
-           o.order_name, 
            u.username, 
            o.order_date, 
-           o.total_price,  -- Correct column (total_price instead of price)
+           o.total_price,  
            o.order_status, 
-           GROUP_CONCAT(CONCAT(oi.item_name, ' (', oi.quantity, ')') SEPARATOR ', ') AS food_items, 
+           o.canteen,  
+           GROUP_CONCAT(oi.item_name SEPARATOR ', ') AS item_names, 
+           GROUP_CONCAT(oi.quantity SEPARATOR ', ') AS quantities, 
            order_notes.note AS order_note
     FROM orders o
     JOIN users u ON o.username = u.username
@@ -57,20 +73,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id'], $_POST['o
     header("Location: staff.php");
     exit();
 }
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id'], $_POST['order_note'])) {
-    $order_id = intval($_POST['order_id']);
-    $order_note = $conn->real_escape_string($_POST['order_note']);
-
-    $updateNoteQuery = "UPDATE orders SET note = ? WHERE order_id = ?";
-    $stmt = $conn->prepare($updateNoteQuery);
-    $stmt->bind_param("si", $order_note, $order_id);
-    $stmt->execute();
-    $stmt->close();
-    header("Location: staff.php");
-    exit();
-}
-
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['accept_order'], $_POST['order_id'])) {
@@ -104,8 +106,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header("Location: staff.php");
     exit();
 }
-
-
 ?>
 
 <!DOCTYPE html>
@@ -115,12 +115,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Staff Panel</title>
     <link rel="stylesheet" text="text/css" href="../../Styles/styles3.css">
+    <style>
+        .dashboard {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .dashboard-item {
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            flex: 1;
+            margin: 0 10px;
+        }
+        .dashboard-item h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #333;
+        }
+        .dashboard-item p {
+            margin: 10px 0 0;
+            font-size: 24px;
+            font-weight: bold;
+            color: #555;
+        }
+    </style>
 </head>
 <body>
 
 <div class="staff-header">
     <h1>Staff Panel - User Orders</h1>
-    <a href="../System/logout.php" class="logout-button">Logout</a>
+    <a href="../../System/logout.php" class="logout-button">Logout</a>
 </div>
 
 <?php if (isset($_SESSION['message'])): ?>
@@ -129,6 +160,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php unset($_SESSION['message']); ?>
     </div>
 <?php endif; ?>
+
+<!-- Dashboard -->
+<div class="dashboard">
+    <div class="dashboard-item">
+        <h3>Pending Orders</h3>
+        <p><?= $statusCounts['Pending'] ?? 0 ?></p>
+    </div>
+    <div class="dashboard-item">
+        <h3>In Progress</h3>
+        <p><?= $statusCounts['In Progress'] ?? 0 ?></p>
+    </div>
+    <div class="dashboard-item">
+        <h3>Completed Orders</h3>
+        <p><?= $statusCounts['Completed'] ?? 0 ?></p>
+    </div>
+    <div class="dashboard-item">
+        <h3>Cancelled Orders</h3>
+        <p><?= $statusCounts['Cancelled'] ?? 0 ?></p>
+    </div>
+</div>
 
 <div class="staff-container">
     <h2>All User Orders</h2>
@@ -140,9 +191,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <th>Order Date</th>
                 <th>Total Price</th>
                 <th>Order Status</th>
-                <th>Order Name</th>
+                <th>Item Names</th>
+                <th>Quantities</th>
+                <th>Canteen</th>  
                 <th>Note</th>
                 <th>Actions</th>
+                <th>Accept</th>
             </tr>
         </thead>
         <tbody>
@@ -154,7 +208,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <td><?= htmlspecialchars($order['order_date']) ?></td>
                     <td>₱<?= htmlspecialchars($order['total_price']) ?></td>
                     <td><?= htmlspecialchars($order['order_status']) ?></td>
-                    <td><?= htmlspecialchars($order['order_name']) ?></td>
+                    <td><?= htmlspecialchars($order['item_names']) ?></td>
+                    <td><?= htmlspecialchars($order['quantities']) ?></td>
+                    <td><?= htmlspecialchars($order['canteen']) ?></td> 
                     <td>
                         <form method="post" style="display: inline;">
                             <input type="hidden" name="order_id" value="<?= htmlspecialchars($order['order_id']) ?>">
@@ -175,21 +231,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <button class="view-details-button" onclick="viewOrderDetails(<?= htmlspecialchars($order['order_id']) ?>)">View Details</button>
                     </td>
                     <td>
-                    <form method="post" style="display: inline;">
-                        <input type="hidden" name="order_id" value="<?= htmlspecialchars($order['order_id']) ?>">
-                        <button type="submit" name="accept_order" class="accept-button">Accept</button>
-                    </form>
-                    <form method="post" style="display: inline;">
-                        <input type="hidden" name="order_id" value="<?= htmlspecialchars($order['order_id']) ?>">
-                        <button type="submit" name="delete_order" class="delete-button">Delete</button>
-                    </form>
+                        <form method="post" style="display: inline;">
+                            <input type="hidden" name="order_id" value="<?= htmlspecialchars($order['order_id']) ?>">
+                            <button type="submit" name="accept_order" class="accept-button">Accept</button>
+                        </form>
+                        <form method="post" style="display: inline;">
+                            <input type="hidden" name="order_id" value="<?= htmlspecialchars($order['order_id']) ?>">
+                            <button type="submit" name="delete_order" class="delete-button">Delete</button>
+                        </form>
                     </td>
-
                 </tr>
             <?php endforeach; ?>
         <?php else: ?>
             <tr>
-                <td colspan="8">No orders found.</td>
+                <td colspan="11">No orders found.</td>
             </tr>
         <?php endif; ?>
         </tbody>
@@ -198,7 +253,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <script>
     function viewOrderDetails(orderId) { 
-        window.location.href = `order_details.php?order_id=${orderId}`;
+        window.location.href = "../../System/order_details.php?order_id=" + orderId;
     }
 </script>
 

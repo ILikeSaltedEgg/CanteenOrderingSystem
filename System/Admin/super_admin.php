@@ -1,6 +1,16 @@
 <?php
 session_start();
-require 'db_connection.php';
+
+$host = "localhost";
+$username = "root";
+$password = "";
+$dbname = "au_canteen";
+
+$conn = new mysqli($host, $username, $password, $dbname);
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
 
 if (!isset($_SESSION['usertype']) || $_SESSION['usertype'] !== 'super_admin') {
     echo "Redirecting to login...";
@@ -8,10 +18,20 @@ if (!isset($_SESSION['usertype']) || $_SESSION['usertype'] !== 'super_admin') {
     exit();
 }
 
-$orders_query = "SELECT o.order_id, u.username, o.total_price, o.order_date 
-                 FROM orders o 
-                 JOIN users u ON o.username = u.username 
-                 ORDER BY o.order_date DESC"; 
+// Fetch orders with item names from order_items
+$orders_query = "
+    SELECT o.order_id, 
+           u.username, 
+           o.total_price, 
+           o.order_date, 
+           o.canteen, 
+           GROUP_CONCAT(oi.item_name SEPARATOR ', ') AS item_names
+    FROM orders o
+    JOIN users u ON o.username = u.username
+    LEFT JOIN order_items oi ON o.order_id = oi.order_id
+    GROUP BY o.order_id
+    ORDER BY o.order_date DESC
+";
 $orders_result = mysqli_query($conn, $orders_query);
 
 if (!$orders_result) {
@@ -38,7 +58,7 @@ if (isset($_POST['validate_users'])) {
 
 if (isset($_POST['add_order'])) {
     $user_id = mysqli_real_escape_string($conn, $_POST['user_id']);
-    $order_details = mysqli_real_escape_string($conn, $_POST['order_details']);
+    $item_name = mysqli_real_escape_string($conn, $_POST['item_name']);
 
     $check_valid_query = "SELECT school_valid FROM users WHERE id = '$user_id'";
     $check_valid_result = mysqli_query($conn, $check_valid_query);
@@ -49,7 +69,7 @@ if (isset($_POST['add_order'])) {
         exit();
     }
 
-    $add_order_query = "INSERT INTO orders (user_id, order_details) VALUES ('$user_id', '$order_details')";
+    $add_order_query = "INSERT INTO orders (user_id, item_name) VALUES ('$user_id', '$item_name')";
     if (!mysqli_query($conn, $add_order_query)) {
         die("Add order query failed: " . mysqli_error($conn));
     }
@@ -76,7 +96,6 @@ if (isset($_GET['delete_user_id'])) {
     header("Location: super_admin.php");
     exit();
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -90,7 +109,7 @@ if (isset($_GET['delete_user_id'])) {
 <body>
     <div class="header">
         <h1>Super Admin Panel</h1>
-        <a href="../System/logout.php" class="logout">Logout</a>
+        <a href="../../System/logout.php" class="logout">Logout</a>
     </div>
 
     <div class="container">
@@ -144,7 +163,9 @@ if (isset($_GET['delete_user_id'])) {
                     <tr>
                         <th>Order ID</th>
                         <th>User</th>
-                        <th>Order Details</th>
+                        <th>Item Names</th>
+                        <th>Canteen</th>
+                        <th>Total Price</th>
                         <th>Created At</th>
                         <th>Actions</th>
                     </tr>
@@ -154,7 +175,9 @@ if (isset($_GET['delete_user_id'])) {
                         <tr>
                             <td><?php echo htmlspecialchars($order['order_id']); ?></td>
                             <td><?php echo htmlspecialchars($order['username']); ?></td>
-                            <td><?php echo htmlspecialchars($order['total_price']); ?></td>
+                            <td><?php echo htmlspecialchars($order['item_names']); ?></td>
+                            <td><?php echo htmlspecialchars($order['canteen']); ?></td>
+                            <td>₱<?php echo htmlspecialchars($order['total_price']); ?></td>
                             <td><?php echo htmlspecialchars($order['order_date']); ?></td>
                             <td>
                                 <a href="super_admin.php?delete_order_id=<?php echo $order['order_id']; ?>" class="btn-delete">Delete</a>
