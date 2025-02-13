@@ -21,7 +21,7 @@ The **Online Canteen Ordering System** is a web-based platform designed to strea
 3. Move the project folder to `htdocs` in the XAMPP directory.  
 4. Import the `au_canteen.sql` file into MySQL using phpMyAdmin.  
 5. Start Apache and MySQL from XAMPP Control Panel.  
-6. Open the project in your browser via `http://localhost/OnlineCanteen/`.  
+6. Open the project in your browser via `http://localhost/CanteenOrderingSystem/`.  
 
 ## Team Members
 - [Calimlim, Ace Joshua A.]
