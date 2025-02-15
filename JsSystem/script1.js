@@ -1,7 +1,7 @@
 let totalAmount = 0;
 let cart = [];
 let currentCanteen = ""; // Track the currently selected canteen
-let currentCategory = "all"; // Track the currently selected category
+let currentCategory = ""; // Track the currently selected category
 
 document.addEventListener("DOMContentLoaded", () => {
     const modal = document.getElementById("payment-modal");
@@ -13,6 +13,39 @@ document.addEventListener("DOMContentLoaded", () => {
     const cartTotalDisplay = document.getElementById("cart-total");
     const hamburgerMenu = document.getElementById("hamburger");
     const menuOptions = document.getElementById("menu-options");
+    const authContainer = document.getElementById("auth-container");
+
+    // Function to update the auth container based on login status
+    function updateAuthContainer() {
+        if (localStorage.getItem("username")) {
+            // User is logged in
+            authContainer.innerHTML = `
+                <span id="user-name">
+                    <span id="user-display-name">${localStorage.getItem("username")}</span>!
+                </span>
+            `;
+        } else {
+            // User is not logged in
+            authContainer.innerHTML = `
+                <span id="user-name">Welcome, Guest!</span>
+                <button id="login-button" onclick="location.href='login.php'">Login</button>
+            `;
+        }
+    }
+
+    // Call the function to update the UI on page load
+    updateAuthContainer();
+
+    // Example: Simulate login/logout (for testing purposes)
+    window.login = function (username) {
+        localStorage.setItem("username", username);
+        updateAuthContainer();
+    };
+
+    window.logout = function () {
+        localStorage.removeItem("username");
+        updateAuthContainer();
+    };
 
     // Function to update the cart display
     const updateCartDisplay = () => {
@@ -55,22 +88,16 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // Function to filter menu items by canteen and category
-    window.filterItems = (canteen, category = "") => {
-        currentCanteen = canteen; // Update the current canteen
-        currentCategory = category; // Update the current category
-    
+    window.filterItems = () => {
         const menuItems = document.querySelectorAll(".menu-item");
         menuItems.forEach(item => {
             const itemCanteen = item.getAttribute("data-canteen");
             const itemCategory = item.getAttribute("data-category");
     
-            const matchesCanteen = itemCanteen === currentCanteen;
-            const matchesCategory = !currentCategory || itemCategory === currentCategory;
-    
-            if (matchesCanteen && matchesCategory) {
-                item.style.display = "block"; // Show items that match both filters
+            if (itemCanteen === "canteen1" && itemCategory === "category1") {
+                item.style.display = "block";
             } else {
-                item.style.display = "none"; // Hide items that don't match
+                item.style.display = "none";
             }
         });
     };

@@ -5,7 +5,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const registerButton = document.getElementById("register-button");
 
     console.log("loginButton:", loginButton); // Debugging
-    console.log("registerButton:", registerButton); // Debugging
 
     // Event listener for the hamburger menu
     hamburgerMenu.addEventListener("click", () => {
@@ -41,27 +40,54 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Check and attach listeners to buttons
     window.placeOrder = function () {
+        // Check if the user is logged in
         if (!localStorage.getItem("username")) {
             alert("You need to be logged in to place an order.");
-            openBox('register');
+            openBox('register'); // Open the registration/login modal
             return;
         }
 
+        // Check if the cart is empty
         if (cart.length === 0) {
             alert("Your cart is empty.");
             return;
         }
 
+        // Proceed with placing the order
         alert("Order placed successfully! Staff has been notified.");
-        clearCart();
+        clearCart(); // Clear the cart after placing the order
     };
 
+    // Function to display login and register buttons
     function displayLoginAndRegisterButtons() {
         const authContainer = document.getElementById("auth-container"); // Ensure this element exists
-        authContainer.innerHTML = `
-            <button class="login-btn" onclick="location.href='login.php'">Login</button>
-            <button class="register-btn" onclick="location.href='register.php'">Register</button>
-        `;
-    }    
+        if (authContainer) {
+            authContainer.innerHTML = `
+                <button class="login-btn" onclick="location.href='login.php'">Login</button>
+            `;
+        }
+    }
 
+    // Function to handle adding items to the cart
+    window.handleAddToCart = function () {
+        // Check if the user is logged in
+        if (!localStorage.getItem("username")) {
+            alert("You must have an account to add items to the cart.");
+            openBox('register'); // Open the registration/login modal
+            return;
+        }
+
+        // Add item to the cart
+        alert("Item added to cart!");
+        // Add your logic to add the item to the cart here
+    };
+
+    // Initialize the UI based on login status
+    if (localStorage.getItem("username")) {
+        // User is logged in
+        console.log("User is logged in");
+    } else {
+        // User is not logged in
+        displayLoginAndRegisterButtons();
+    }
 });

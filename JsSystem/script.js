@@ -1,33 +1,151 @@
+let totalAmount = 0;
 let cart = [];
+let currentCanteen = ""; // Track the currently selected canteen
+let currentCategory = ""; // Track the currently selected category
 
-document.addEventListener('DOMContentLoaded', function () {
-    const headerContainer = document.querySelector('.top-header');
+document.addEventListener("DOMContentLoaded", () => {
+    const modal = document.getElementById("payment-modal");
+    const modalContent = document.querySelector(".modal-content");
+    const paymentForm = document.getElementById("payment-form");
+    const paymentOptions = document.getElementsByName("payment-method");
+    const totalAmountInput = document.getElementById("total-amount");
+    const cartItemsContainer = document.getElementById("cart-items");
+    const cartTotalDisplay = document.getElementById("cart-total");
+    const hamburgerMenu = document.getElementById("hamburger");
+    const menuOptions = document.getElementById("menu-options");
     const authContainer = document.getElementById("auth-container");
 
-    if (localStorage.getItem("username")) {
-        displayLoggedInState();
-    } else {
-        displayLoginAndRegisterButtons();
+    // Function to update the auth container based on login status
+    function updateAuthContainer() {
+        if (localStorage.getItem("username")) {
+            // User is logged in
+            authContainer.innerHTML = `
+                <span id="user-name">
+                    <span id="user-display-name">${localStorage.getItem("username")}</span>!
+                </span>
+            `;
+        } else {
+            // User is not logged in
+            authContainer.innerHTML = `
+                <span id="user-name">Welcome, Guest!</span>
+                <button id="login-button" onclick="location.href='login.php'">Login</button>
+            `;
+        }
     }
 
-    window.addToCart = function (itemName, itemPrice) {
-        if (!localStorage.getItem("username")) {
-            alert("You need an account to add items to the cart.");
-            openBox('register');
+    // Call the function to update the UI on page load
+    updateAuthContainer();
+
+    // Example: Simulate login/logout (for testing purposes)
+    window.login = function (username) {
+        localStorage.setItem("username", username);
+        updateAuthContainer();
+    };
+
+    window.logout = function () {
+        localStorage.removeItem("username");
+        updateAuthContainer();
+    };
+
+    // Function to update the cart display
+    const updateCartDisplay = () => {
+        if (cart.length === 0) {
+            cartItemsContainer.innerHTML = "<p>Your cart is empty.</p>";
+            cartTotalDisplay.textContent = "Total: ₱0.00";
             return;
         }
 
-        let existingItem = cart.find(item => item.name === itemName);
-
-        if (existingItem) {
-            existingItem.quantity += 1;
-        } else {
-            cart.push({ name: itemName, price: itemPrice, quantity: 1 });
-        }
-
-        updateCartDisplay();
+        cartItemsContainer.innerHTML = cart.map((item, index) => `
+            <li data-name="${item.name}" data-price="${item.price}" data-quantity="${item.quantity}">
+                ${item.name} ${item.quantity}x - ₱${(item.price * item.quantity).toFixed(2)}
+                <button class="remove-item" data-index="${index}">Remove</button>
+            </li>
+        `).join("");
+        cartTotalDisplay.textContent = `Total: ₱${totalAmount.toFixed(2)}`;
     };
 
+    // Function to add items to the cart
+    window.addToCart = (itemName, itemPrice, button) => {
+        const quantityInput = button.parentElement.querySelector(".quantity-input");
+        const quantity = parseInt(quantityInput.value);
+
+        if (!itemName || isNaN(itemPrice) || isNaN(quantity) || quantity <= 0) {
+            showToast("Invalid item or quantity. Please try again.");
+            return;
+        }
+
+        const existingItem = cart.find(item => item.name === itemName);
+
+        if (existingItem) {
+            existingItem.quantity += quantity;
+        } else {
+            cart.push({ name: itemName, price: itemPrice, quantity });
+        }
+
+        totalAmount += itemPrice * quantity;
+        updateCartDisplay();
+        showToast(`${itemName} added to cart.`);
+    };
+
+    // Function to filter menu items by canteen and category
+    window.filterItems = () => {
+        const menuItems = document.querySelectorAll(".menu-item");
+        menuItems.forEach(item => {
+            const itemCanteen = item.getAttribute("data-canteen");
+            const itemCategory = item.getAttribute("data-category");
+    
+            if (itemCanteen === "canteen1" && itemCategory === "category1") {
+                item.style.display = "block";
+            } else {
+                item.style.display = "none";
+            }
+        });
+    };
+    
+
+    // Function to open the payment modal
+    window.openModal = () => {
+        if (cart.length === 0) {
+            showToast("Your cart is empty. Add items before proceeding to payment.");
+            return;
+        }
+
+        // Show the payment modal
+        totalAmountInput.value = totalAmount.toFixed(2);
+        modal.style.display = "flex";
+        setTimeout(() => modalContent.classList.add("show"), 10);
+    };
+
+    // Function to close the payment modal
+    window.closeModal = () => {
+        modalContent.classList.remove("show");
+        setTimeout(() => modal.style.display = "none", 300);
+    };
+
+    // Function to handle the payment form submission
+    paymentForm.addEventListener("submit", (e) => {
+    e.preventDefault(); // Prevent the default form submission
+
+    const selectedPaymentMethod = getSelectedPaymentMethod();
+
+    if (!selectedPaymentMethod) {
+        showToast("Please select a payment method.");
+        return;
+    }
+
+    // Determine the form action based on the selected payment method
+    let formAction;
+    switch (selectedPaymentMethod) {
+        case "gcash":
+        case "paymaya":
+        case "cash":
+            formAction = "process_payment.php"; // Process payment and redirect
+            break;
+        default:
+            formAction = "staff.php"; // Default to staff.php
+    }
+
+    // Prepare the order data
     const cartItems = [];
     const cartList = document.querySelectorAll('#cart-items li');
     cartList.forEach(item => {
@@ -69,164 +187,76 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.body.appendChild(form);
     form.submit();
-
-
-    function updateCartDisplay() {
-        const cartItemsContainer = document.getElementById("cart-items");
-        const cartTotal = document.getElementById("cart-total");
-
-        if (!cartItemsContainer || !cartTotal) {
-            console.error("Cart items container or cart total element is missing in the HTML.");
-            return;
-        }
-
-        cartItemsContainer.innerHTML = "";
-        let total = 0;
-
-        cart.forEach(item => {
-            const itemTotal = item.price * item.quantity;
-            total += itemTotal;
-
-            const listItem = document.createElement("li");
-            listItem.textContent = `${item.name} (x${item.quantity}) - ₱${itemTotal.toFixed(2)}`;
-            cartItemsContainer.appendChild(listItem);
-        });
-
-        cartTotal.textContent = `₱${total.toFixed(2)}`;
-    }
-
-    window.clearCart = function () {
-        cart = [];
-        updateCartDisplay();
-    };
-
-    function displayLoggedInState() {
-        const username = localStorage.getItem("username");
-
-        authContainer.innerHTML = `
-            <span>Welcome, ${username}</span>
-            <div id="hamburger-menu">
-                <button class="menu-btn">☰</button>
-                <div class="menu-dropdown" id="menu-dropdown">
-                    <a href="account.html">Account</a>
-                    <a href="settings.html">Settings</a>
-                    <button onclick="logout()">Logout</button>
-                </div>
-            </div>
-        `;
-
-        const menuBtn = document.querySelector('.menu-btn');
-        const menuDropdown = document.getElementById('menu-dropdown');
-        
-        menuBtn.addEventListener('click', () => {
-            menuDropdown.style.display = 
-                menuDropdown.style.display === 'block' ? 'none' : 'block';
-        });
-    }
-
-    window.logout = function () {
-        localStorage.removeItem("username");
-        alert("You have been logged out.");
-        location.reload();
-    };
 });
 
-function filterItems(category) {
-    const menuItems = document.querySelectorAll('.menu-item');
+    // Function to get the selected payment method
+    const getSelectedPaymentMethod = () => {
+        return Array.from(paymentOptions).find(option => option.checked)?.value || null;
+    };
 
-    menuItems.forEach((item) => {
-        if (category === 'all' || item.dataset.category === category) {
-            item.style.display = 'block';
-        } else {
-            item.style.display = 'none';
-        }
-    });
-}
-
-const filterCategory = (category) => {
-    const allItems = document.querySelectorAll('.menu-item');
-    allItems.forEach((item) => {
-        if (category === 'All' || item.dataset.category === category) {
-            item.style.display = 'block';
-        } else {
-            item.style.display = 'none';
+    // Event listener for removing items from the cart
+    cartItemsContainer.addEventListener("click", (e) => {
+        if (e.target.classList.contains("remove-item")) {
+            const itemIndex = e.target.dataset.index;
+            totalAmount -= cart[itemIndex].price * cart[itemIndex].quantity;
+            cart.splice(itemIndex, 1);
+            updateCartDisplay();
+            showToast("Item removed from cart.");
         }
     });
 
-    const container = document.getElementById('menu-items');
-    if (container) {
-        container.style.minHeight = `${container.offsetHeight}px`;
-    }
-};
+    // Event listener for the hamburger menu
+    hamburgerMenu.addEventListener("click", () => {
+        menuOptions.classList.toggle("active");
 
-// Function to get the selected payment method
-const getSelectedPaymentMethod = () => {
-    return Array.from(paymentOptions).find(option => option.checked)?.value || null;
-};
+        const [topLine, middleLine, bottomLine] = [
+            document.getElementById("top-line"),
+            document.getElementById("middle-line"),
+            document.getElementById("bottom-line")
+        ];
 
-// Event listener for removing items from the cart
-cartItemsContainer.addEventListener("click", (e) => {
-    if (e.target.classList.contains("remove-item")) {
-        const itemIndex = e.target.dataset.index;
-        totalAmount -= cart[itemIndex].price * cart[itemIndex].quantity;
-        cart.splice(itemIndex, 1);
-        updateCartDisplay();
-        showToast("Item removed from cart.");
-    }
+        if (menuOptions.classList.contains("active")) {
+            topLine.style.transform = "translateY(10px) rotate(45deg)";
+            middleLine.style.opacity = "0";
+            bottomLine.style.transform = "translateY(-10px) rotate(-45deg)";
+        } else {
+            topLine.style.transform = "translateY(0) rotate(0)";
+            middleLine.style.opacity = "1";
+            bottomLine.style.transform = "translateY(0) rotate(0)";
+        }
+    });
+
+    // Event listener to close the hamburger menu when clicking outside
+    document.addEventListener("click", (e) => {
+        if (!hamburgerMenu.contains(e.target) && !menuOptions.contains(e.target)) {
+            menuOptions.classList.remove("active");
+
+            document.getElementById("top-line").style.transform = "translateY(0) rotate(0)";
+            document.getElementById("middle-line").style.opacity = "1";
+            document.getElementById("bottom-line").style.transform = "translateY(0) rotate(0)";
+        }
+    });
+
+    // Function to show a toast message
+    const showToast = (message) => {
+        const toast = document.createElement("div");
+        toast.className = "toast";
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => toast.classList.add("show"), 100);
+        setTimeout(() => {
+            toast.classList.remove("show");
+            toast.remove();
+        }, 3000);
+    };
+
+    // Function to create a hidden input field
+    const createHiddenInput = (name, value) => {
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = name;
+        input.value = value;
+        return input;
+    };
 });
-
-// Event listener for the hamburger menu
-hamburgerMenu.addEventListener("click", () => {
-    menuOptions.classList.toggle("active");
-
-    const [topLine, middleLine, bottomLine] = [
-        document.getElementById("top-line"),
-        document.getElementById("middle-line"),
-        document.getElementById("bottom-line")
-    ];
-
-    if (menuOptions.classList.contains("active")) {
-        topLine.style.transform = "translateY(10px) rotate(45deg)";
-        middleLine.style.opacity = "0";
-        bottomLine.style.transform = "translateY(-10px) rotate(-45deg)";
-    } else {
-        topLine.style.transform = "translateY(0) rotate(0)";
-        middleLine.style.opacity = "1";
-        bottomLine.style.transform = "translateY(0) rotate(0)";
-    }
-});
-
-// Event listener to close the hamburger menu when clicking outside
-document.addEventListener("click", (e) => {
-    if (!hamburgerMenu.contains(e.target) && !menuOptions.contains(e.target)) {
-        menuOptions.classList.remove("active");
-
-        document.getElementById("top-line").style.transform = "translateY(0) rotate(0)";
-        document.getElementById("middle-line").style.opacity = "1";
-        document.getElementById("bottom-line").style.transform = "translateY(0) rotate(0)";
-    }
-});
-
-// Function to show a toast message
-const showToast = (message) => {
-    const toast = document.createElement("div");
-    toast.className = "toast";
-    toast.textContent = message;
-    document.body.appendChild(toast);
-
-    setTimeout(() => toast.classList.add("show"), 100);
-    setTimeout(() => {
-        toast.classList.remove("show");
-        toast.remove();
-    }, 3000);
-};
-
-// Function to create a hidden input field
-const createHiddenInput = (name, value) => {
-    const input = document.createElement("input");
-    input.type = "hidden";
-    input.name = name;
-    input.value = value;
-    return input;
-};
-
