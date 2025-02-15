@@ -27,10 +27,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
     if ($stmt->execute()) {
         $order_id = $stmt->insert_id;
 
-        $insertOrderItemsQuery = "INSERT INTO order_items (order_id, item_name, price, quantity) VALUES (?, ?, ?, ?)";
+        $insertOrderItemsQuery = "INSERT INTO order_items (order_id, item_name, price, quantity, canteen) VALUES (?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($insertOrderItemsQuery);
         foreach ($cart_items as $item) {
-            $stmt->bind_param("isdi", $order_id, $item['name'], $item['price'], $item['quantity']);
+            $stmt->bind_param("isdis", $order_id, $item['name'], $item['price'], $item['quantity'], $item['canteen']);
             $stmt->execute();
         }
 
@@ -63,6 +63,103 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
     <title>Cafeteria</title>
     <link rel="stylesheet" type="text/css" href="../Styles/styles2.css">
     <script>
+        let currentCanteen = "Canteen 1"; // Default to Canteen 1
+        let currentCategory = ""; // Track the currently selected category
+
+        // Function to filter items by canteen and category
+        function filterItems(canteen, category = "") {
+            currentCanteen = canteen; // Update the current canteen
+            currentCategory = category; // Update the current category
+
+            const menuItems = document.querySelectorAll(".menu-item");
+            menuItems.forEach(item => {
+                const itemCanteen = item.getAttribute("data-canteen");
+                const itemCategory = item.getAttribute("data-category");
+
+                const matchesCanteen = itemCanteen === currentCanteen;
+                const matchesCategory = !currentCategory || itemCategory === currentCategory;
+
+                if (matchesCanteen && matchesCategory) {
+                    item.style.display = "block"; // Show items that match both filters
+                } else {
+                    item.style.display = "none"; // Hide items that don't match
+                }
+            });
+        }
+
+        // Function to add items to the cart
+        window.addToCart = (itemName, itemPrice, button) => {
+            const quantityInput = button.parentElement.querySelector(".quantity-input");
+            const quantity = parseInt(quantityInput.value);
+            const canteen = button.closest(".menu-item").getAttribute("data-canteen"); // Get the canteen
+
+            if (!itemName || isNaN(itemPrice) || isNaN(quantity) || quantity <= 0) {
+                showToast("Invalid item or quantity. Please try again.");
+                return;
+            }
+
+            const existingItem = cart.find(item => item.name === itemName && item.canteen === canteen);
+
+            if (existingItem) {
+                existingItem.quantity += quantity;
+            } else {
+                cart.push({ name: itemName, price: itemPrice, quantity, canteen });
+            }
+
+            totalAmount += itemPrice * quantity;
+            updateCartDisplay();
+            showToast(`${itemName} added to cart.`);
+        };
+
+        // Function to update the cart display
+        const updateCartDisplay = () => {
+            const cartItemsContainer = document.getElementById("cart-items");
+            const cartTotalDisplay = document.getElementById("cart-total");
+
+            if (cart.length === 0) {
+                cartItemsContainer.innerHTML = "<p>Your cart is empty.</p>";
+                cartTotalDisplay.textContent = "Total: ₱0.00";
+                return;
+            }
+
+            cartItemsContainer.innerHTML = cart.map((item, index) => `
+                <li data-name="${item.name}" data-price="${item.price}" data-quantity="${item.quantity}" data-canteen="${item.canteen}">
+                    ${item.name} (${item.canteen}) ${item.quantity}x - ₱${(item.price * item.quantity).toFixed(2)}
+                    <button class="remove-item" data-index="${index}">Remove</button>
+                </li>
+            `).join("");
+            cartTotalDisplay.textContent = `Total: ₱${totalAmount.toFixed(2)}`;
+        };
+
+        // Function to clear the cart
+        window.clearCart = () => {
+            cart = [];
+            totalAmount = 0;
+            updateCartDisplay();
+            showToast("Cart cleared.");
+        };
+
+        // Function to open the payment modal
+        window.openModal = () => {
+            if (cart.length === 0) {
+                showToast("Your cart is empty. Add items before proceeding to payment.");
+                return;
+            }
+
+            const cartItems = [];
+            const cartList = document.querySelectorAll('#cart-items li');
+            cartList.forEach(item => {
+                const name = item.getAttribute('data-name');
+                const price = parseFloat(item.getAttribute('data-price'));
+                const quantity = parseInt(item.getAttribute('data-quantity'));
+                const canteen = item.getAttribute('data-canteen');
+                cartItems.push({ name, price, quantity, canteen });
+            });
+
+            redirectToStaff(cartItems);
+        };
+
+        // Function to redirect to staff.php
         function redirectToStaff(cartItems) {
             const form = document.createElement('form');
             form.method = 'POST';
@@ -78,45 +175,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
             form.submit();
         }
 
-        function openModal() {
-            const cartItems = [];
-            const cartList = document.querySelectorAll('#cart-items li');
-            cartList.forEach(item => {
-                const name = item.getAttribute('data-name');
-                const price = parseFloat(item.getAttribute('data-price'));
-                const quantity = parseInt(item.getAttribute('data-quantity'));
-                cartItems.push({ name, price, quantity });
-            });
-
-            redirectToStaff(cartItems);
-        }
+        // Show Canteen 1 items by default on page load
+        document.addEventListener("DOMContentLoaded", () => {
+            filterItems("Canteen 1");
+        });
     </script>
 </head>
 
 <body>
-    <header class="top-header">
+
+<header class="top-header">
         <img src="https://upload.wikimedia.org/wikipedia/en/thumb/8/8b/Arellano_University_logo.png/200px-Arellano_University_logo.png" alt="Logo" id="logo">
         <h1>Arellano University Jose Rizal Campus</h1>
         <h2>Online Canteen</h2>
         <div id="auth-container">
-            <?php
-            if (isset($_SESSION['username'])) {
-                echo '<span id="user-name"><span id="user-display-name">' . htmlspecialchars($_SESSION['username']) . '</span>!</span>';
-            } else {
-                echo '<span id="user-name">Welcome, Guest!</span>';
-            }
-            ?>
+        <?php
+        if (isset($_SESSION['username'])) {
+            echo '<span id="user-name"><span id="user-display-name">' . htmlspecialchars($_SESSION['username']) . '</span>!</span>';
+        } else {
+            echo '<span id="user-name">Welcome, Guest!</span>';
+        }
+        ?>
         </div>
-
-        <a href="cart.php" id="cart-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="9" cy="21" r="1"></circle>
-                <circle cx="20" cy="21" r="1"></circle>
-                <path d="M1 1h4l2 13h13l2-7H6"></path>
-            </svg>
-        </a>
-
-
 
         <svg id="hamburger" class="Header__toggle-svg" viewBox="0 0 60 40" width="40" height="40">
             <g stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
@@ -128,27 +208,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
 
         <nav id="menu-options" class="menu-options">
             <a href="account.php">Account</a>
-            <a href="Research2.php">Home</a>
+            <?php
+            if (isset($_SESSION['username'])) {
+                echo '<a href="Research2.php">Home</a>';
+            } else {
+                echo '<a href="Research1.php">Home</a>';
+                
+            }
+            ?>
             <a href="">Contact Staff</a>
             <a href="../System/logout.php" class="logout-button">Logout</a>
         </nav>
     </header>
+    
 
     <main>
-        <section class="menu-header">
-        </section>
+        <section class="menu-header"></section>
 
         <section id="Canteen-buttons">
-        <button class="Canteen-button" onclick="filterItems('Canteen 1')">Canteen 1</button>
-        <button class="Canteen-button" onclick="filterItems('Canteen 2')">Canteen 2</button>
-        <button class="Canteen-button" onclick="filterItems('Canteen 3')">Canteen 3</button>
+            <button class="Canteen-button" onclick="filterItems('Canteen 1')">Canteen 1</button>
+            <button class="Canteen-button" onclick="filterItems('Canteen 2')">Canteen 2</button>
+            <button class="Canteen-button" onclick="filterItems('Canteen 3')">Canteen 3</button>
         </section>
 
         <section id="category-buttons">
-        <button class="category-button" onclick="filterItems('all')">All</button>
-        <button class="category-button" onclick="filterItems(currentCanteen, 'meals')">Meals</button>
-        <button class="category-button" onclick="filterItems(currentCanteen, 'snacks')">Snacks</button>
-        <button class="category-button" onclick="filterItems(currentCanteen, 'drinks')">Drinks</button>
+            <button class="category-button" onclick="filterItems(currentCanteen, '')">All</button>
+            <button class="category-button" onclick="filterItems(currentCanteen, 'meals')">Meals</button>
+            <button class="category-button" onclick="filterItems(currentCanteen, 'snacks')">Snacks</button>
+            <button class="category-button" onclick="filterItems(currentCanteen, 'drinks')">Drinks</button>
         </section>
 
         <section id="container">
@@ -183,6 +270,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
                 </div>
 
                 <div class="menu-item" data-category="snacks" data-canteen="Canteen 1">
+                    <img src="https://insanelygoodrecipes.com/wp-content/uploads/2020/05/Burger-with-cheese.jpg" alt="Burger">
+                    <h3>Burger</h3>
+                    <p>Price: ₱30</p>
+                    <div class="cart-controls">
+                        <input type="number" class="quantity-input" value="1" min="1">
+                        <button class="add-to-cart" 
+                            <?php if (!$is_valid_to_order) echo 'disabled'; ?> 
+                            onclick="addToCart('Burger', 30, this)">
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+
+                <div class="menu-item" data-category="snacks" data-canteen="Canteen 2">
                     <img src="https://insanelygoodrecipes.com/wp-content/uploads/2020/05/Burger-with-cheese.jpg" alt="Burger">
                     <h3>Burger</h3>
                     <p>Price: ₱30</p>
@@ -349,6 +450,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
                         </button>
                     </div>
                 </div>
+                <!-- Menu items here -->
             </div>
         </section>
 
@@ -361,6 +463,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
         </section>
 
         <div id="payment-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close-button" onclick="closeModal()">&times;</span>
+                <h2>Complete Your Payment</h2>
+                <form id="payment-form" action="process_payment.php" method="POST">
+                    <!-- Payment form content -->
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script src="../JsSystem/script1.js"></script>
+    <?php include 'footer.php'; ?>
+
+    <div id="payment-modal" class="modal" style="display: none;">
             <div class="modal-content">
                 <span class="close-button" onclick="closeModal()">&times;</span>
                 <h2>Complete Your Payment</h2>
@@ -433,22 +549,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
             <p>Estimated Time: <span id="timer">00:00</span></p>
         </div>
     </main>
-
-    <script>
-        function filterItems(category) {
-            const items = document.querySelectorAll('.menu-item');
-            items.forEach(item => {
-                if (category === 'all' || item.getAttribute('data-category') === category) {
-                    item.style.display = 'block';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-        }
-    </script>
-    <script src="../JsSystem/script1.js"></script>
-
-    <?php include 'footer.php'; ?>
     
 </body>
 
