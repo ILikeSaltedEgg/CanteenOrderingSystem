@@ -32,6 +32,18 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // Fetch user details from hidden input fields
+    const userName = document.getElementById("hidden-user-name").value;
+    const userTrack = document.getElementById("hidden-user-track").value;
+    const userSection = document.getElementById("hidden-user-section").value;
+
+    // Function to update user details in the cart
+    const updateUserDetails = () => {
+        document.getElementById("user-name").textContent = userName;
+        document.getElementById("user-track").textContent = userTrack;
+        document.getElementById("user-section").textContent = userSection;
+    };  
+
     // Call the function to update the UI on page load
     updateAuthContainer();
 
@@ -56,7 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         cartItemsContainer.innerHTML = cart.map((item, index) => `
             <li data-name="${item.name}" data-price="${item.price}" data-quantity="${item.quantity}" data-canteen="${item.canteen}">
-                ${item.name} (${item.canteen}) ${item.quantity}x - ₱${(item.price * item.quantity).toFixed(2)}
+                ${item.name} (${item.canteen}) (₱${item.price}) ${item.quantity}x - ₱${(item.price * item.quantity).toFixed(2)}
                 <button class="remove-item" data-index="${index}">Remove</button>
             </li>
         `).join("");
