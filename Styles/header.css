@@ -98,7 +98,7 @@ body {
     justify-content: flex-end;
     align-items: center;
     position: absolute;
-    top: 35px; 
+    top: 25px; 
     right: 140px;  
     gap: 10px; 
     color: white;
@@ -185,6 +185,8 @@ button {
 .register-button,
 .login-button {
     padding: 10px 15px;
+    position: relative;
+    top: 12px;
     background-color: #215188;
     color: white;
     border: none;
@@ -208,7 +210,7 @@ button {
   
 .login-button {
     position: absolute;
-    top: 50%;
+    top: 10px;
     right: 130px;
     transform: translateY(-50%);
 }
