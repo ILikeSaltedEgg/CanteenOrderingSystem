@@ -3,30 +3,39 @@ session_start();
 require 'db_connection.php';
 
 $is_valid_to_order = false;
-if (isset($_SESSION['username'])) {
-    $username = $_SESSION['username'];
-    $query = "SELECT school_valid FROM users WHERE username = '$username'";
+if (isset($_SESSION['email'])) { // Use email instead of username
+    $email = $_SESSION['email'];
+    $query = "SELECT school_valid FROM users WHERE email = '$email'";
     $result = mysqli_query($conn, $query);
     if ($result) {
         $user_data = mysqli_fetch_assoc($result);
-        $is_valid_to_order = (bool) $user_data['school_valid'];
+        $is_valid_to_order = (bool) $user_data['school_valid']; // Check if school_valid is 1
     } else {
         die("Error fetching user data: " . mysqli_error($conn));
     }
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST['total_amount'], $_POST['order_note'])) {
+    // Check if the user is valid to order
+    if (!$is_valid_to_order) {
+        $_SESSION['message'] = "You are not authorized to place an order. Please verify your school ID.";
+        header("Location: research1.php"); // Redirect to the homepage or a verification page
+        exit();
+    }
+
     $cart_items = json_decode($_POST['cart_items'], true);
     $total_amount = floatval($_POST['total_amount']);
     $order_note = $conn->real_escape_string($_POST['order_note']);
-    $username = $_SESSION['username']; 
+    $email = $_SESSION['email']; // Use email instead of username
 
-    $insertOrderQuery = "INSERT INTO orders (username, total_price, order_status) VALUES (?, ?, 'pending')";
+    // Insert the order into the database
+    $insertOrderQuery = "INSERT INTO orders (email, total_price, order_status) VALUES (?, ?, 'pending')";
     $stmt = $conn->prepare($insertOrderQuery);
-    $stmt->bind_param("sd", $username, $total_amount);
+    $stmt->bind_param("sd", $email, $total_amount);
     if ($stmt->execute()) {
         $order_id = $stmt->insert_id;
 
+        // Insert order items into the database
         $insertOrderItemsQuery = "INSERT INTO order_items (order_id, item_name, price, quantity, canteen) VALUES (?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($insertOrderItemsQuery);
         foreach ($cart_items as $item) {
@@ -34,6 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
             $stmt->execute();
         }
 
+        // Insert order note if provided
         if (!empty($order_note)) {
             $insertNoteQuery = "INSERT INTO order_notes (order_id, note) VALUES (?, ?)";
             $stmt = $conn->prepare($insertNoteQuery);
@@ -52,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
     header("Location: ./system/staff.php");
     exit();
 }
-?>
+?>  
 
 <!DOCTYPE html>
 <html lang="en">
@@ -62,124 +72,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cafeteria</title>
     <link rel="stylesheet" type="text/css" href="../Styles/styles2.css">
-    <script>
-        let currentCanteen = "Canteen 1"; // Default to Canteen 1
-        let currentCategory = ""; // Track the currently selected category
-
-        // Function to filter items by canteen and category
-        function filterItems(canteen, category = "") {
-            currentCanteen = canteen; // Update the current canteen
-            currentCategory = category; // Update the current category
-
-            const menuItems = document.querySelectorAll(".menu-item");
-            menuItems.forEach(item => {
-                const itemCanteen = item.getAttribute("data-canteen");
-                const itemCategory = item.getAttribute("data-category");
-
-                const matchesCanteen = itemCanteen === currentCanteen;
-                const matchesCategory = !currentCategory || itemCategory === currentCategory;
-
-                if (matchesCanteen && matchesCategory) {
-                    item.style.display = "block"; // Show items that match both filters
-                } else {
-                    item.style.display = "none"; // Hide items that don't match
-                }
-            });
-        }
-
-        // Function to add items to the cart
-        window.addToCart = (itemName, itemPrice, button) => {
-            const quantityInput = button.parentElement.querySelector(".quantity-input");
-            const quantity = parseInt(quantityInput.value);
-            const canteen = button.closest(".menu-item").getAttribute("data-canteen"); // Get the canteen
-
-            if (!itemName || isNaN(itemPrice) || isNaN(quantity) || quantity <= 0) {
-                showToast("Invalid item or quantity. Please try again.");
-                return;
-            }
-
-            const existingItem = cart.find(item => item.name === itemName && item.canteen === canteen);
-
-            if (existingItem) {
-                existingItem.quantity += quantity;
-            } else {
-                cart.push({ name: itemName, price: itemPrice, quantity, canteen });
-            }
-
-            totalAmount += itemPrice * quantity;
-            updateCartDisplay();
-            showToast(`${itemName} added to cart.`);
-        };
-
-        // Function to update the cart display
-        const updateCartDisplay = () => {
-            const cartItemsContainer = document.getElementById("cart-items");
-            const cartTotalDisplay = document.getElementById("cart-total");
-
-            if (cart.length === 0) {
-                cartItemsContainer.innerHTML = "<p>Your cart is empty.</p>";
-                cartTotalDisplay.textContent = "Total: ₱0.00";
-                return;
-            }
-
-            cartItemsContainer.innerHTML = cart.map((item, index) => `
-                <li data-name="${item.name}" data-price="${item.price}" data-quantity="${item.quantity}" data-canteen="${item.canteen}">
-                    ${item.name} (${item.canteen}) ${item.quantity}x - ₱${(item.price * item.quantity).toFixed(2)}
-                    <button class="remove-item" data-index="${index}">Remove</button>
-                </li>
-            `).join("");
-            cartTotalDisplay.textContent = `Total: ₱${totalAmount.toFixed(2)}`;
-        };
-
-        // Function to clear the cart
-        window.clearCart = () => {
-            cart = [];
-            totalAmount = 0;
-            updateCartDisplay();
-            showToast("Cart cleared.");
-        };
-
-        // Function to open the payment modal
-        window.openModal = () => {
-            if (cart.length === 0) {
-                showToast("Your cart is empty. Add items before proceeding to payment.");
-                return;
-            }
-
-            const cartItems = [];
-            const cartList = document.querySelectorAll('#cart-items li');
-            cartList.forEach(item => {
-                const name = item.getAttribute('data-name');
-                const price = parseFloat(item.getAttribute('data-price'));
-                const quantity = parseInt(item.getAttribute('data-quantity'));
-                const canteen = item.getAttribute('data-canteen');
-                cartItems.push({ name, price, quantity, canteen });
-            });
-
-            redirectToStaff(cartItems);
-        };
-
-        // Function to redirect to staff.php
-        function redirectToStaff(cartItems) {
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = 'staff.php';
-
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'cart_items';
-            input.value = JSON.stringify(cartItems);
-
-            form.appendChild(input);
-            document.body.appendChild(form);
-            form.submit();
-        }
-
-        // Show Canteen 1 items by default on page load
-        document.addEventListener("DOMContentLoaded", () => {
-            filterItems("Canteen 1");
-        });
-    </script>
 </head>
 
 <body>
@@ -189,13 +81,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
         <h1>Arellano University Jose Rizal Campus</h1>
         <h2>Online Canteen</h2>
         <div id="auth-container">
-        <?php
-        if (isset($_SESSION['username'])) {
-            echo '<span id="user-name"><span id="user-display-name">' . htmlspecialchars($_SESSION['username']) . '</span>!</span>';
-        } else {
-            echo '<span id="user-name">Welcome, Guest!</span>';
-        }
-        ?>
+        <?php if (isset($_SESSION['email'])): ?>
+            <span id="user-name">
+                Welcome, <span id="user-display-name"><?= htmlspecialchars($displayName) ?></span>!
+            </span>
+            <?php else: ?>
+                <span id="user-name">Welcome, Guest!</span>
+            <?php endif; ?>
         </div>
 
         <svg id="hamburger" class="Header__toggle-svg" viewBox="0 0 60 40" width="40" height="40">
@@ -207,15 +99,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
         </svg>
 
         <nav id="menu-options" class="menu-options">
-            <a href="account.php">Account</a>
             <?php
-            if (isset($_SESSION['username'])) {
+            if (isset($_SESSION['email'])) {
+                echo '<a href="account.php">Account</a>';
+            } else {
+                echo '<a href="login.php">Login</a>';
+            }
+            ?>
+
+            <?php
+            if (isset($_SESSION['email'])) {
                 echo '<a href="Research2.php">Home</a>';
             } else {
                 echo '<a href="Research1.php">Home</a>';
                 
             }
             ?>
+
             <a href="">Contact Staff</a>
             <a href="../System/logout.php" class="logout-button">Logout</a>
         </nav>
@@ -367,6 +267,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
                     </div>
                 </div>
 
+                <div class="menu-item" data-category="drinks" data-canteen="Canteen 2">
+                    <img src="https://shopmetro.ph/itpark-supermarket/wp-content/uploads/2021/03/SM9378636-11.jpg" alt="C2">
+                    <h3>C2</h3>
+                    <p>Price: ₱25</p>
+                    <div class="cart-controls">
+                        <input type="number" class="quantity-input" value="1" min="1">
+                        <button class="add-to-cart" 
+                            <?php if (!$is_valid_to_order) echo 'disabled'; ?> 
+                            onclick="addToCart('C2', 25, this)">
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+
+                <div class="menu-item" data-category="drinks" data-canteen="Canteen 3">
+                    <img src="https://shopmetro.ph/itpark-supermarket/wp-content/uploads/2021/03/SM9378636-11.jpg" alt="C2">
+                    <h3>C2</h3>
+                    <p>Price: ₱25</p>
+                    <div class="cart-controls">
+                        <input type="number" class="quantity-input" value="1" min="1">
+                        <button class="add-to-cart" 
+                            <?php if (!$is_valid_to_order) echo 'disabled'; ?> 
+                            onclick="addToCart('C2', 25, this)">
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+
                 <div class="menu-item" data-category="snacks" data-canteen="Canteen 1">
                     <img src="https://www.kawalingpinoy.com/wp-content/uploads/2019/07/kwek-kwek-14-730x973.jpg" alt="kwekkwek">
                     <h3>Kwek-kwek</h3>
@@ -382,6 +310,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
                 </div>
 
                 <div class="menu-item" data-category="snacks" data-canteen="Canteen 1">
+                    <img src="https://mygroceryph.com/pub/media/catalog/product/cache/942fb7ebd8f124d7d8ad39312cbc983a/p/i/piattos_roadhouse_barbecue_flavor_40g.jpg" alt="piattos">
+                    <h3>Piattos BBQ Flavour</h3>
+                    <p>Price: ₱20</p>
+                    <div class="cart-controls">
+                        <input type="number" class="quantity-input" value="1" min="1">
+                        <button class="add-to-cart" 
+                            <?php if (!$is_valid_to_order) echo 'disabled'; ?> 
+                            onclick="addToCart('Piattos BBQ Flavour', 20, this)">
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+
+                <div class="menu-item" data-category="snacks" data-canteen="Canteen 2">
+                    <img src="https://mygroceryph.com/pub/media/catalog/product/cache/942fb7ebd8f124d7d8ad39312cbc983a/p/i/piattos_roadhouse_barbecue_flavor_40g.jpg" alt="piattos">
+                    <h3>Piattos BBQ Flavour</h3>
+                    <p>Price: ₱20</p>
+                    <div class="cart-controls">
+                        <input type="number" class="quantity-input" value="1" min="1">
+                        <button class="add-to-cart" 
+                            <?php if (!$is_valid_to_order) echo 'disabled'; ?> 
+                            onclick="addToCart('Piattos BBQ Flavour', 20, this)">
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+
+                <div class="menu-item" data-category="snacks" data-canteen="Canteen 3">
                     <img src="https://mygroceryph.com/pub/media/catalog/product/cache/942fb7ebd8f124d7d8ad39312cbc983a/p/i/piattos_roadhouse_barbecue_flavor_40g.jpg" alt="piattos">
                     <h3>Piattos BBQ Flavour</h3>
                     <p>Price: ₱20</p>
@@ -423,7 +379,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
                     </div>
                 </div>
 
-                <div class="menu-item" data-category="snacks" data-canteen="Canteen 1">
+                <div class="menu-item" data-category="snacks" data-canteen="Canteen 2">
+                    <img src="https://e-saricom.ph/cdn/shop/files/Piatossourcream.jpg?v=1701173327&width=823" alt="piattos">
+                    <h3>Piattos Sour Cream Flavour</h3>
+                    <p>Price: ₱20</p>
+                    <div class="cart-controls">
+                        <input type="number" class="quantity-input" value="1" min="1">
+                        <button class="add-to-cart" 
+                            <?php if (!$is_valid_to_order) echo 'disabled'; ?> 
+                            onclick="addToCart('Piattos Sour Cream Flavour', 20, this)">
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+
+                <div class="menu-item" data-category="snacks" data-canteen="Canteen 3">
+                    <img src="https://e-saricom.ph/cdn/shop/files/Piatossourcream.jpg?v=1701173327&width=823" alt="piattos">
+                    <h3>Piattos Sour Cream Flavour</h3>
+                    <p>Price: ₱20</p>
+                    <div class="cart-controls">
+                        <input type="number" class="quantity-input" value="1" min="1">
+                        <button class="add-to-cart" 
+                            <?php if (!$is_valid_to_order) echo 'disabled'; ?> 
+                            onclick="addToCart('Piattos Sour Cream Flavour', 20, this)">
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+
+                <div class="menu-item" data-category="snacks" data-canteen="Canteen 3">
                     <img src="https://leitesculinaria.com/wp-content/uploads/2021/05/perfect-hot-dog.jpg" alt="hotdog">
                     <h3>Hotdog</h3>
                     <p>Price: ₱25</p>
@@ -463,20 +447,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
         </section>
 
         <div id="payment-modal" class="modal" style="display: none;">
-            <div class="modal-content">
-                <span class="close-button" onclick="closeModal()">&times;</span>
-                <h2>Complete Your Payment</h2>
-                <form id="payment-form" action="process_payment.php" method="POST">
-                    <!-- Payment form content -->
-                </form>
-            </div>
-        </div>
-    </main>
-
-    <script src="../JsSystem/script1.js"></script>
-    <?php include 'footer.php'; ?>
-
-    <div id="payment-modal" class="modal" style="display: none;">
             <div class="modal-content">
                 <span class="close-button" onclick="closeModal()">&times;</span>
                 <h2>Complete Your Payment</h2>
@@ -544,6 +514,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
                 </form>
             </div>
         </div>
+    </main>
+
+    <script src="../JsSystem/script1.js"></script>
+    <?php include 'footer.php'; ?>
 
         <div id="timer-box" style="display: none;">
             <p>Estimated Time: <span id="timer">00:00</span></p>
