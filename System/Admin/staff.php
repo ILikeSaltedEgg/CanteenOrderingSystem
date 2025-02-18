@@ -11,6 +11,7 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// Redirect to login if the user is not logged in as staff
 if (!isset($_SESSION['usertype']) || $_SESSION['usertype'] !== 'staff') {
     header("Location: login.php");
     exit();
@@ -36,11 +37,12 @@ if ($statusResult && $statusResult->num_rows > 0) {
     }
 }
 
+// Fetch all orders
 $orders = [];
-
 $orderQuery = "
     SELECT o.order_id, 
            u.username, 
+           u.section, 
            o.order_date, 
            o.total_price,  
            o.order_status, 
@@ -49,7 +51,7 @@ $orderQuery = "
            GROUP_CONCAT(oi.quantity SEPARATOR ', ') AS quantities, 
            order_notes.note AS order_note
     FROM orders o
-    JOIN users u ON o.username = u.username
+    JOIN users u ON o.email = u.email
     LEFT JOIN order_items oi ON o.order_id = oi.order_id
     LEFT JOIN order_notes ON o.order_id = order_notes.order_id
     GROUP BY o.order_id
@@ -61,6 +63,7 @@ if ($orderResult && $orderResult->num_rows > 0) {
     $orders = $orderResult->fetch_all(MYSQLI_ASSOC);
 }
 
+// Handle order status updates
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id'], $_POST['order_status'])) {
     $order_id = intval($_POST['order_id']);
     $order_status = $conn->real_escape_string($_POST['order_status']);
@@ -74,35 +77,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id'], $_POST['o
     exit();
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['accept_order'], $_POST['order_id'])) {
-        $order_id = intval($_POST['order_id']);
-        
-        $acceptQuery = "UPDATE orders SET order_status = 'In Progress' WHERE order_id = ?";
-        $stmt = $conn->prepare($acceptQuery);
-        $stmt->bind_param("i", $order_id);
-        if ($stmt->execute()) {
-            $_SESSION['message'] = "Order #{$order_id} has been accepted.";
-        } else {
-            $_SESSION['message'] = "Failed to accept order #{$order_id}.";
-        }
-        $stmt->close();
+// Handle order acceptance
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accept_order'], $_POST['order_id'])) {
+    $order_id = intval($_POST['order_id']);
+    
+    $acceptQuery = "UPDATE orders SET order_status = 'In Progress' WHERE order_id = ?";
+    $stmt = $conn->prepare($acceptQuery);
+    $stmt->bind_param("i", $order_id);
+    if ($stmt->execute()) {
+        $_SESSION['message'] = "Order #{$order_id} has been accepted.";
+    } else {
+        $_SESSION['message'] = "Failed to accept order #{$order_id}.";
     }
+    $stmt->close();
+    header("Location: staff.php");
+    exit();
+}
 
-    if (isset($_POST['delete_order'], $_POST['order_id'])) {
-        $order_id = intval($_POST['order_id']);
+// Handle order deletion
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_order'], $_POST['order_id'])) {
+    $order_id = intval($_POST['order_id']);
 
-        $deleteQuery = "DELETE FROM orders WHERE order_id = ?";
-        $stmt = $conn->prepare($deleteQuery);
-        $stmt->bind_param("i", $order_id);
-        if ($stmt->execute()) {
-            $_SESSION['message'] = "Order #{$order_id} has been deleted.";
-        } else {
-            $_SESSION['message'] = "Failed to delete order #{$order_id}.";
-        }
-        $stmt->close();
+    $deleteQuery = "DELETE FROM orders WHERE order_id = ?";
+    $stmt = $conn->prepare($deleteQuery);
+    $stmt->bind_param("i", $order_id);
+    if ($stmt->execute()) {
+        $_SESSION['message'] = "Order #{$order_id} has been deleted.";
+    } else {
+        $_SESSION['message'] = "Failed to delete order #{$order_id}.";
     }
-
+    $stmt->close();
     header("Location: staff.php");
     exit();
 }
@@ -188,6 +192,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <tr>
                 <th>Order ID</th>
                 <th>Username</th>
+                <th>Section</th>
+                <th>Track</th>
                 <th>Order Date</th>
                 <th>Total Price</th>
                 <th>Order Status</th>
@@ -205,6 +211,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <tr>
                     <td><?= htmlspecialchars($order['order_id']) ?></td>
                     <td><?= htmlspecialchars($order['username']) ?></td>
+                    <td><?= htmlspecialchars($order['section']) ?></td>
+                    <td><?= htmlspecialchars($order['track']) ?></td>
                     <td><?= htmlspecialchars($order['order_date']) ?></td>
                     <td>₱<?= htmlspecialchars($order['total_price']) ?></td>
                     <td><?= htmlspecialchars($order['order_status']) ?></td>
@@ -244,7 +252,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php endforeach; ?>
         <?php else: ?>
             <tr>
-                <td colspan="11">No orders found.</td>
+                <td colspan="12">No orders found.</td>
             </tr>
         <?php endif; ?>
         </tbody>

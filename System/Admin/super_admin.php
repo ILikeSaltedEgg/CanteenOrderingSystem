@@ -22,6 +22,7 @@ if (!isset($_SESSION['usertype']) || $_SESSION['usertype'] !== 'super_admin') {
 $orders_query = "
     SELECT o.order_id, 
            u.username, 
+           o.email,
            o.total_price, 
            o.order_date, 
            o.canteen, 
@@ -204,8 +205,10 @@ if (isset($_GET['delete_user_id'])) {
                     <tr>
                         <th>ID</th>
                         <th>Username</th>
+                        <th>Email</th>
                         <th>User Type</th>
                         <th>Section</th>
+                        <th>Track</th>
                         <th>Valid</th>
                         <th>Validate</th>
                         <th>Created At</th>
@@ -217,8 +220,10 @@ if (isset($_GET['delete_user_id'])) {
                         <tr>
                             <td><?php echo htmlspecialchars($user['id']); ?></td>
                             <td><?php echo htmlspecialchars($user['username']); ?></td>
+                            <td><?php echo htmlspecialchars($user['email']); ?></td>
                             <td><?php echo htmlspecialchars($user['usertype']); ?></td>
                             <td><?php echo htmlspecialchars($user['section']); ?></td>
+                            <td><?php echo htmlspecialchars($user['track']); ?></td>
                             <td><?php echo $user['school_valid'] ? 'Yes' : 'No'; ?></td>
                             <td>
                                 <form method="POST" action="" style="display: inline;">
@@ -251,6 +256,8 @@ if (isset($_GET['delete_user_id'])) {
                     <tr>
                         <th>Order ID</th>
                         <th>User</th>
+                        <th>Section</th>
+                        <th>Track</th>
                         <th>Item Names</th>
                         <th>Canteen</th>
                         <th>Total Price</th>
@@ -264,6 +271,8 @@ if (isset($_GET['delete_user_id'])) {
                             <td><?php echo htmlspecialchars($order['order_id']); ?></td>
                             <td><?php echo htmlspecialchars($order['username']); ?></td>
                             <td><?php echo htmlspecialchars($order['item_names']); ?></td>
+                            <td><?php echo htmlspecialchars($order['section']); ?></td>
+                            <td><?php echo htmlspecialchars($order['track']); ?></td>
                             <td><?php echo htmlspecialchars($order['canteen']); ?></td>
                             <td>₱<?php echo htmlspecialchars($order['total_price']); ?></td>
                             <td><?php echo htmlspecialchars($order['order_date']); ?></td>
