@@ -9,7 +9,7 @@ include 'db_connection.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <a href="research2.php">
+    <a href="<?php echo isset($_SESSION['email']) ? 'research2.php' : 'research1.php'; ?>">
     <img src="https://upload.wikimedia.org/wikipedia/en/thumb/8/8b/Arellano_University_logo.png/200px-Arellano_University_logo.png" alt="Logo" id="logo">
     </a>
     <title>Terms of Service</title>

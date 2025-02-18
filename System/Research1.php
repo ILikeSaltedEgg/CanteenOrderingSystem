@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cafeteria</title>
-    <link rel="stylesheet" type="text/css" href="../Styles/styles2.css">
+    <link rel="stylesheet" type="text/css" href="../Styles/styles.css">
     <script>
         let currentCanteen = "Canteen 1"; // Default to Canteen 1
         let currentCategory = ""; // Track the currently selected category

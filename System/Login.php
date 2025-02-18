@@ -34,13 +34,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
-        $hashed_password = $row['password'];
+        $hashed_password = $row['password']; // Hashed password from the database
         $usertype = $row['usertype'];
-
-        if (password_verify($pass, $hashed_password)) {
-            $_SESSION["email"] = $email; // Correctly set the session email
+    
+        if (password_verify($pass, $hashed_password)) { // Verify the password
+            $_SESSION["email"] = $email;
             $_SESSION["usertype"] = $usertype;
-
+    
             // Redirect based on usertype
             if ($usertype == "super_admin") {
                 echo "<script>alert('Welcome, Admin!'); window.location.href='../System/Admin/super_admin.php';</script>";
@@ -55,8 +55,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         echo "<script>alert('Email does not exist!'); window.location.href='Login.php';</script>";
     }
-
-    $stmt->close();
+    
 }
 
 $conn->close();

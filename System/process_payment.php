@@ -12,12 +12,17 @@ if ($conn->connect_error) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Check if the user is logged in
+    if (!isset($_SESSION['email'])) {
+        header("Location: login.php");
+        exit();
+    }
+
     // Retrieve payment method and other data
     $paymentMethod = $_POST['payment_method'] ?? '';
     $cartData = $_POST['cart_items'] ?? '[]'; // Ensure it's a valid JSON array
     $totalAmount = $_POST['total_amount'] ?? 0;
     $canteen = $_POST['canteen'] ?? '';
-    $item_name = $_POST['item_name'] ?? ''; // This is not needed since we'll get item names from cart data
 
     // Decode cart items safely
     $cartItems = json_decode($cartData, true);
@@ -28,12 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $totalAmount = floatval($totalAmount);
-    $username = $_SESSION['username'] ?? '';
-
-    if (empty($username)) {
-        header("Location: login.php");
-        exit();
-    }
+    $email = $_SESSION['email']; // Use email from session
 
     // Set timer duration based on payment method
     $timerDuration = match ($paymentMethod) {
@@ -47,8 +47,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $order_status = 'Pending';
 
     // Prepare the SQL statement for inserting into the `orders` table
-    $stmt = $conn->prepare("INSERT INTO orders (total_price, username, order_status, canteen, order_date) VALUES (?, ?, ?, ?, ?)");
-    $stmt->bind_param("dssss", $totalAmount, $username, $order_status, $canteen, $order_date);
+    $stmt = $conn->prepare("INSERT INTO orders (total_price, email, order_status, canteen, order_date) VALUES (?, ?, ?, ?, ?)");
+    $stmt->bind_param("dssss", $totalAmount, $email, $order_status, $canteen, $order_date);
 
     if ($stmt->execute()) {
         $order_id = $stmt->insert_id; // Get the ID of the newly inserted order
@@ -80,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Set QR code URL based on payment method
         $_SESSION['qr_code_url'] = match ($paymentMethod) {
-            'gcash' => "https://example.com/gcash-qr",
+            'gcash' => "../assets/images/Gcash-qr.png",
             'paymaya' => "https://example.com/paymaya-qr",
             default => "",
         };

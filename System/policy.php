@@ -6,11 +6,11 @@ include 'db_connection.php';
 
 
 <!DOCTYPE html>
-< lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <a href="<?php echo isset($_SESSION['username']) ? 'research2.php' : 'research1.php'; ?>">
+    <a href="<?php echo isset($_SESSION['email']) ? 'research2.php' : 'research1.php'; ?>">
     <img src="https://upload.wikimedia.org/wikipedia/en/thumb/8/8b/Arellano_University_logo.png/200px-Arellano_University_logo.png" alt="Logo" id="logo">
     </a>
     <title>Privacy Policy</title>
@@ -29,7 +29,7 @@ include 'db_connection.php';
         <p>We collect the following types of information:</p>
         <ul>
             <li><strong>Personal Identification Information:</strong> This may include your name, email address, phone number, etc., that you provide when creating an account or placing an order.</li>
-            <li><strong>Payment Information:</strong> We collect payment details (credit card numbers, billing address, etc.) when you make a purchase.</li>
+            <li><strong>Payment Information:</strong> We collect payment details (Online Payment, billing address, etc.) when you make a purchase.</li>
             <li><strong>Usage Data:</strong> We collect data on how you interact with our website and services, such as the pages you visit, time spent, etc.</li>
         </ul>
 

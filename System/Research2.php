@@ -3,16 +3,30 @@ session_start();
 require 'db_connection.php';
 
 $is_valid_to_order = false;
+$username = "Guest"; // Default username
+$user_track = "N/A"; // Default track
+$user_section = "N/A"; // Default section
+
 if (isset($_SESSION['email'])) { // Use email instead of username
     $email = $_SESSION['email'];
-    $query = "SELECT school_valid FROM users WHERE email = '$email'";
-    $result = mysqli_query($conn, $query);
-    if ($result) {
-        $user_data = mysqli_fetch_assoc($result);
+
+    // Fetch username and school_valid status
+    $query = "SELECT username, track, section, school_valid FROM users WHERE email = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $user_data = $result->fetch_assoc();
+        $username = $user_data['username']; // Fetch username
+        $user_track = $user_data['track']; // Fetch track
+        $user_section = $user_data['section']; // Fetch section
         $is_valid_to_order = (bool) $user_data['school_valid']; // Check if school_valid is 1
     } else {
         die("Error fetching user data: " . mysqli_error($conn));
     }
+    $stmt->close();
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST['total_amount'], $_POST['order_note'])) {
@@ -62,7 +76,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
     header("Location: ./system/staff.php");
     exit();
 }
-?>  
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome</title>
+</head>
+<body>
+    <div id="auth-container">
+        <?php if (isset($_SESSION['email'])): ?>
+            <span id="user-name">
+                Welcome, <span id="user-display-name"><?= htmlspecialchars($username) ?></span>!
+            </span>
+        <?php else: ?>
+            <span id="user-name">Welcome, Guest!</span>
+        <?php endif; ?>
+    </div>
+</body>
+</html>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -76,18 +110,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
 
 <body>
 
+    <input type="hidden" id="hidden-user-name" value="<?= htmlspecialchars($username) ?>">
+    <input type="hidden" id="hidden-user-track" value="<?= htmlspecialchars($user_track) ?>">
+    <input type="hidden" id="hidden-user-section" value="<?= htmlspecialchars($user_section) ?>">
+
 <header class="top-header">
         <img src="https://upload.wikimedia.org/wikipedia/en/thumb/8/8b/Arellano_University_logo.png/200px-Arellano_University_logo.png" alt="Logo" id="logo">
         <h1>Arellano University Jose Rizal Campus</h1>
         <h2>Online Canteen</h2>
         <div id="auth-container">
-        <?php if (isset($_SESSION['email'])): ?>
+        <?php 
+        if (isset($_SESSION['email'])): 
+            $displayName = isset($_SESSION['username']) ? $_SESSION['username'] : 'User'; 
+        ?>
             <span id="user-name">
                 Welcome, <span id="user-display-name"><?= htmlspecialchars($displayName) ?></span>!
             </span>
-            <?php else: ?>
-                <span id="user-name">Welcome, Guest!</span>
-            <?php endif; ?>
+        <?php else: ?>
+            <span id="user-name">Welcome, Guest!</span>
+        <?php endif; ?>
         </div>
 
         <svg id="hamburger" class="Header__toggle-svg" viewBox="0 0 60 40" width="40" height="40">
@@ -439,7 +480,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
         </section>
 
         <section id="cart-container">
-            <h3>Your Order</h3>
+        <h3>Your Order</h3>
+            <div id="user-details">
+                <p><strong>Name:</strong> <span id="user-name">[User Name]</span></p>
+                <p><strong>Track:</strong> <span id="user-track">[User Track]</span></p>
+                <p><strong>Section:</strong> <span id="user-section">[User Section]</span></p>
+            </div>
             <ul id="cart-items"></ul>
             <p id="cart-total">Total: ₱0</p>
             <button id="clear-cart-button" onclick="clearCart()">Clear Cart</button>

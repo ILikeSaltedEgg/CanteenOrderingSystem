@@ -1,5 +1,6 @@
 <?php
 session_start();
+require 'db_connection.php'; // Ensure this file contains the database connection logic
 
 // Redirect to login if the user is not logged in
 if (!isset($_SESSION['usertype'])) {
@@ -9,30 +10,56 @@ if (!isset($_SESSION['usertype'])) {
 
 // Initialize user details
 $user = [
-    'username' => $_SESSION['username'] ?? 'Unknown User',
-    'section' => $_SESSION['section'] ?? 'Not Set',
+    'username' => 'Unknown User',
+    'section' => 'Not Set',
     'usertype' => $_SESSION['usertype'] ?? 'user',
 ];
 
-// Set default session values if not already set
-if (!isset($_SESSION['email'])) {
-    $_SESSION['email'] = 'sfDwG2024@yahoo.com';
-    $_SESSION['country'] = 'Philippines';
-    $_SESSION['grade_level'] = 'Grade 1E';
-    $_SESSION['track'] = 'TECH-VOC/ICT';
+// Fetch user details from the database
+if (isset($_SESSION['email'])) {
+    $email = $_SESSION['email'];
+    $query = "SELECT username, section, grade_level, track FROM users WHERE email = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $user['username'] = $row['username'];
+        $user['section'] = $row['section'];
+        $_SESSION['grade_level'] = $row['grade_level'];
+        $_SESSION['track'] = $row['track'];
+    }
+    $stmt->close();
 }
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['username']) && isset($_POST['section']) && isset($_POST['email']) && isset($_POST['grade_level']) && isset($_POST['track'])) {
-        // Update session variables
-        $_SESSION['username'] = $_POST['username'];
-        $_SESSION['section'] = $_POST['section'];
-        $_SESSION['email'] = $_POST['email'];
-        $_SESSION['grade_level'] = $_POST['grade_level'];
-        $_SESSION['track'] = $_POST['track'];
+    if (isset($_POST['username'], $_POST['section'], $_POST['email'], $_POST['grade_level'], $_POST['track'])) {
+        $username = $_POST['username'];
+        $section = $_POST['section'];
+        $email = $_POST['email'];
+        $grade_level = $_POST['grade_level'];
+        $track = $_POST['track'];
 
-        $_SESSION['message'] = "Profile updated successfully!";
+        // Update session variables
+        $_SESSION['username'] = $username;
+        $_SESSION['section'] = $section;
+        $_SESSION['email'] = $email;
+        $_SESSION['grade_level'] = $grade_level;
+        $_SESSION['track'] = $track;
+
+        // Update the database
+        $updateQuery = "UPDATE users SET username = ?, section = ?, grade_level = ?, track = ? WHERE email = ?";
+        $stmt = $conn->prepare($updateQuery);
+        $stmt->bind_param("sssss", $username, $section, $grade_level, $track, $email);
+        if ($stmt->execute()) {
+            $_SESSION['message'] = "Profile updated successfully!";
+        } else {
+            $_SESSION['message'] = "Failed to update profile.";
+        }
+        $stmt->close();
         header("Location: account.php");
         exit();
     }

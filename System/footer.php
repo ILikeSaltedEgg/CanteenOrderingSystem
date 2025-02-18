@@ -1,3 +1,10 @@
+<?php 
+
+include 'db_connection.php';
+
+?>
+
+
 <link   rel="stylesheet" href="../Styles/footer.css">
 
 <footer>
@@ -12,7 +19,7 @@
             <div class="footer-links">
                 <h3>Quick Links</h3>
                 <ul>
-                    <?php if (isset($_SESSION["username"])): ?>
+                    <?php if (isset($_SESSION["email"])): ?>
                     <li><a href="research2.php">Home</a></li>
                     <?php else: ?>
                         <li><a href="research1.php">Home</a></li>
