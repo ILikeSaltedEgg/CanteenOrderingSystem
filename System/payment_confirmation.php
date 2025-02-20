@@ -81,6 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['note'])) {
 <body>
     <div class="payment-container">
         <h1>Payment Confirmation</h1>
+        <h3>Note: We will re-order the food you order if you do not get the food that you order in 30 minutes</h3>
         <p>Total Amount: ₱<?= number_format($totalAmount, 2); ?></p>
         <p>Canteen: <?= htmlspecialchars($canteen); ?></p>
 
@@ -98,19 +99,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['note'])) {
         <ul>
             <?php foreach ($order_items as $item): ?>
                 <li>
-                    <?= htmlspecialchars($item['name']); ?> -
+                    <?= htmlspecialchars($item['item_name']); ?> -
                     <?= htmlspecialchars($item['quantity']); ?>x -
                     ₱<?= number_format($item['price'] * $item['quantity'], 2); ?>
                 </li>
             <?php endforeach; ?>
         </ul>
-
-        <!-- Add a note form -->
-        <form method="POST" action="payment_confirmation.php">
-            <label for="note">Add a note to your order:</label>
-            <textarea id="note" name="note" rows="4" cols="50"></textarea>
-            <button type="submit">Submit Note</button>
-        </form>
 
         <p>Download the receipt:</p> <a href="invoice.php" target="_blank">Receipt?</a>
 

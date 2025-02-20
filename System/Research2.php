@@ -11,7 +11,7 @@ if (isset($_SESSION['email'])) { // Use email instead of username
     $email = $_SESSION['email'];
 
     // Fetch username and school_valid status
-    $query = "SELECT username, track, section, school_valid FROM users WHERE email = ?";
+    $query = "SELECT username, track, section, contact_number, school_valid FROM users WHERE email = ?";
     $stmt = $conn->prepare($query);
     $stmt->bind_param("s", $email);
     $stmt->execute();
@@ -22,11 +22,17 @@ if (isset($_SESSION['email'])) { // Use email instead of username
         $username = $user_data['username']; // Fetch username
         $user_track = $user_data['track']; // Fetch track
         $user_section = $user_data['section']; // Fetch section
+        $user_contact = $user_data['contact_number']; // Fetch contact number
         $is_valid_to_order = (bool) $user_data['school_valid']; // Check if school_valid is 1
     } else {
         die("Error fetching user data: " . mysqli_error($conn));
     }
     $stmt->close();
+
+    // Store the fetched values in session variables
+    $_SESSION['username'] = $username;
+    $_SESSION['track'] = $user_track;
+    $_SESSION['section'] = $user_section;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST['total_amount'], $_POST['order_note'])) {
@@ -80,26 +86,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
 
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome</title>
-</head>
-<body>
-    <div id="auth-container">
-        <?php if (isset($_SESSION['email'])): ?>
-            <span id="user-name">
-                Welcome, <span id="user-display-name"><?= htmlspecialchars($username) ?></span>!
-            </span>
-        <?php else: ?>
-            <span id="user-name">Welcome, Guest!</span>
-        <?php endif; ?>
-    </div>
-</body>
-</html>
-
-<!DOCTYPE html>
-<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -121,15 +107,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
         <div id="auth-container">
         <?php 
         if (isset($_SESSION['email'])): 
-            $displayName = isset($_SESSION['username']) ? $_SESSION['username'] : 'User'; 
+            $username = isset($_SESSION['username']) ? $_SESSION['username'] : 'User'; 
         ?>
             <span id="user-name">
-                Welcome, <span id="user-display-name"><?= htmlspecialchars($displayName) ?></span>!
+                Welcome, <span id="user-display-name"><?= htmlspecialchars($username) ?></span>
             </span>
         <?php else: ?>
             <span id="user-name">Welcome, Guest!</span>
         <?php endif; ?>
         </div>
+
 
         <svg id="hamburger" class="Header__toggle-svg" viewBox="0 0 60 40" width="40" height="40">
             <g stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
@@ -476,90 +463,88 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
                     </div>
                 </div>
                 <!-- Menu items here -->
+
+                <div id="cart-container">
+                    <h3>Your Order</h3>
+                <div id="user-details">
+                    <?php if (isset($_SESSION['email'])): ?>
+                        <p><strong>Name:</strong> <span id="user_name"><?= htmlspecialchars($username) ?></p>
+                    <?php else: ?>
+                        <p><strong>Name:</strong> <span id="user-name">[User Name]</span></p>
+                    <?php endif; ?>
+
+                    <?php if (isset($_SESSION['email'])): ?>
+                        <p><strong>Track:</strong> <span id="user_track"><?= htmlspecialchars($user_track) ?></p>
+                    <?php else: ?>
+                        <p><strong>Track:</strong> <span id="user-track">[User Track]</span></p>
+                    <?php endif; ?>
+
+                    <?php if (isset($_SESSION['email'])): ?>
+                        <p><strong>Section:</strong> <span id="user_section"><?= htmlspecialchars($user_section) ?></p>
+                    <?php else: ?>
+                        <p><strong>Section:</strong> <span id="user-section">[User Section]</span></p>
+                    <?php endif; ?>
+
+                    <?php if (isset($_SESSION['email'])): ?>
+                        <p><strong>Contact:</strong> <span id="user_section"><?= htmlspecialchars($user_contact) ?></p>
+                    <?php else: ?>
+                        <p><strong>Contact:</strong> <span id="user-section">[User Contact]</span></p>
+                    <?php endif; ?>
+                </div>
+
+                <ul id="cart-items"></ul>
+                <p id="cart-total">Total: ₱0</p>
+                <button id="clear-cart-button" onclick="clearCart()">Clear Cart</button>
+                <button id="order-button" onclick="openModal()">Order Now</button>
+                </div>
             </div>
         </section>
 
-        <section id="cart-container">
-        <h3>Your Order</h3>
-            <div id="user-details">
-                <p><strong>Name:</strong> <span id="user-name">[User Name]</span></p>
-                <p><strong>Track:</strong> <span id="user-track">[User Track]</span></p>
-                <p><strong>Section:</strong> <span id="user-section">[User Section]</span></p>
-            </div>
-            <ul id="cart-items"></ul>
-            <p id="cart-total">Total: ₱0</p>
-            <button id="clear-cart-button" onclick="clearCart()">Clear Cart</button>
-            <button id="order-button" onclick="openModal()">Order Now</button>
-        </section>
 
         <div id="payment-modal" class="modal" style="display: none;">
-            <div class="modal-content">
-                <span class="close-button" onclick="closeModal()">&times;</span>
-                <h2>Complete Your Payment</h2>
-                <form id="payment-form" action="process_payment.php" method="POST">
-                    <div class="form-group">
-                        <label for="payment-method">Payment Methods:</label>
-                        <div class="payment-options">
-                            <label class="radio-container">
-                                <input type="radio" name="payment-method" value="gcash" required>
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/GCash_logo.svg/1280px-GCash_logo.svg.png" alt="Gcash">
-                                <span class="radio-label">GCash</span>
-                            </label>
-                            <label class="radio-container">
-                                <input type="radio" name="payment-method" value="paymaya">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/PayMaya_Logo.png/1200px-PayMaya_Logo.png" alt="PayMaya">
-                                <span class="radio-label">PayMaya</span>
-                            </label>
-                            <label class="radio-container">
-                                <input type="radio" name="payment-method" value="cash">
-                                <span class="radio-label">Cash</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="total-amount">Total Amount:</label>
-                        <input id="total-amount" name="total-amount" type="text" readonly>
-                        <input type="hidden" id="total-amount-input" name="total_amount" value="0">
-
-                    </div>
-
-                    <div class="form-group">
-                    <label for="note">Note:</label>
-                    <textarea id="note" name="note"></textarea>
-                    </div>
-
-
-                    <div class="button-group">
-                        <button type="submit">Pay Now</button>
-                    </div>  
-
-                    <script>
-                    function submitPayment() {
-
-                        const form = document.createElement('form');
-                        form.method = 'POST';
-                        form.action = 'process_payment.php';
-
-                        const cartField = document.createElement('input');
-                        cartField.type = 'hidden';
-                        cartField.name = 'cart';
-                        cartField.value = JSON.stringify(cart); 
-                        form.appendChild(cartField);
-
-                        const totalAmountField = document.createElement('input');
-                        totalAmountField.type = 'hidden';
-                        totalAmountField.name = 'total-amount';
-                        totalAmountField.value = totalAmount;
-                        form.appendChild(totalAmountField);
-
-                        document.body.appendChild(form);
-                        form.submit();
-                    }
-                    </script>
-                </form>
+        <div class="modal-content">
+        <span class="close-button" onclick="closeModal()">&times;</span>
+        <h2>Complete Your Payment</h2>
+        <!-- Single form that submits all data -->
+        <form id="payment-form" action="process_payment.php" method="POST">
+            <div class="form-group">
+                <label for="payment-method">Payment Methods:</label>
+                <div class="payment-options">
+                    <label class="radio-container">
+                        <input type="radio" name="payment-method" value="gcash" required>
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/GCash_logo.svg/1280px-GCash_logo.svg.png" alt="Gcash">
+                        <span class="radio-label">GCash</span>
+                    </label>
+                    <label class="radio-container">
+                        <input type="radio" name="payment-method" value="paymaya">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/PayMaya_Logo.png/1200px-PayMaya_Logo.png" alt="PayMaya">
+                        <span class="radio-label">PayMaya</span>
+                    </label>
+                    <label class="radio-container">
+                        <input type="radio" name="payment-method" value="cash">
+                        <span class="radio-label">Cash</span>
+                    </label>
+                </div>
             </div>
-        </div>
+
+            <div class="form-group">
+                <label for="total-amount">Total Amount:</label>
+                <input id="total-amount" name="total-amount" type="text" readonly>
+                <input type="hidden" id="total-amount-input" name="total_amount" value="0">
+            </div>
+
+            <!-- Note field added to the same form -->
+            <div class="form-group">
+                <label for="note">Note:</label>
+                <textarea id="note" name="note"></textarea>
+            </div>
+
+            <div class="button-group">
+                <button type="submit">Pay Now</button>
+            </div>
+        </form>
+    </div>
+</div>
     </main>
 
     <script src="../JsSystem/script1.js"></script>
