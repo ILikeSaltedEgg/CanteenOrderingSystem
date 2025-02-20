@@ -13,50 +13,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const cartTotalDisplay = document.getElementById("cart-total");
     const hamburgerMenu = document.getElementById("hamburger");
     const menuOptions = document.getElementById("menu-options");
-    const authContainer = document.getElementById("auth-container");
-
-    // Function to update the auth container based on login status
-    function updateAuthContainer() {
-        if (localStorage.getItem("username")) {
-            // User is logged in
-            authContainer.innerHTML = `
-                <span id="user-name">
-                    <span id="user-display-name">${localStorage.getItem("username")}</span>!
-                </span>
-            `;
-        } else {
-            // User is not logged in
-            authContainer.innerHTML = `
-                <span id="user-name">Welcome, Guest!</span>
-            `;
-        }
-    }
-
-    // Fetch user details from hidden input fields
-    const userName = document.getElementById("hidden-user-name").value;
-    const userTrack = document.getElementById("hidden-user-track").value;
-    const userSection = document.getElementById("hidden-user-section").value;
-
-    // Function to update user details in the cart
-    const updateUserDetails = () => {
-        document.getElementById("user-name").textContent = userName;
-        document.getElementById("user-track").textContent = userTrack;
-        document.getElementById("user-section").textContent = userSection;
-    };  
-
-    // Call the function to update the UI on page load
-    updateAuthContainer();
-
-    // Example: Simulate login/logout (for testing purposes)
-    window.login = function (username) {
-        localStorage.setItem("username", username);
-        updateAuthContainer();
-    };
-
-    window.logout = function () {
-        localStorage.removeItem("username");
-        updateAuthContainer();
-    };
 
     // Function to update the cart display
     const updateCartDisplay = () => {
@@ -75,11 +31,17 @@ document.addEventListener("DOMContentLoaded", () => {
         cartTotalDisplay.textContent = `Total: ₱${totalAmount.toFixed(2)}`;
     };
 
+    // Clear the cart
+    window.clearCart = function () {
+        cart = [];
+        updateCartDisplay();
+    };
+
     // Function to add items to the cart
     window.addToCart = (itemName, itemPrice, button) => {
         const quantityInput = button.parentElement.querySelector(".quantity-input");
         const quantity = parseInt(quantityInput.value);
-        const canteen = button.closest(".menu-item").getAttribute("data-canteen"); // Get the canteen
+        const canteen = button.closest(".menu-item").getAttribute("data-canteen");
 
         if (!itemName || isNaN(itemPrice) || isNaN(quantity) || quantity <= 0) {
             showToast("Invalid item or quantity. Please try again.");
@@ -101,22 +63,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Function to filter menu items by canteen and category
     window.filterItems = (canteen, category = "") => {
-        currentCanteen = canteen; // Update the current canteen
-        currentCategory = category; // Update the current category
+        currentCanteen = canteen;
+        currentCategory = category;
 
-        const menuItems = document.querySelectorAll(".menu-item");
-        menuItems.forEach(item => {
-            const itemCanteen = item.getAttribute("data-canteen");
-            const itemCategory = item.getAttribute("data-category");
-
-            const matchesCanteen = itemCanteen === currentCanteen;
-            const matchesCategory = !currentCategory || itemCategory === currentCategory;
-
-            if (matchesCanteen && matchesCategory) {
-                item.style.display = "block"; // Show items that match both filters
-            } else {
-                item.style.display = "none"; // Hide items that don't match
-            }
+        document.querySelectorAll(".menu-item").forEach(item => {
+            const matchesCanteen = item.getAttribute("data-canteen") === currentCanteen;
+            const matchesCategory = !currentCategory || item.getAttribute("data-category") === currentCategory;
+            item.style.display = matchesCanteen && matchesCategory ? "block" : "none";
         });
     };
 
@@ -127,7 +80,6 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // Show the payment modal
         totalAmountInput.value = totalAmount.toFixed(2);
         modal.style.display = "flex";
         setTimeout(() => modalContent.classList.add("show"), 10);
@@ -136,13 +88,17 @@ document.addEventListener("DOMContentLoaded", () => {
     // Function to close the payment modal
     window.closeModal = () => {
         modalContent.classList.remove("show");
-        setTimeout(() => modal.style.display = "none", 300);
+        setTimeout(() => { modal.style.display = "none"; }, 300);
     };
 
-    // Function to handle the payment form submission
-    paymentForm.addEventListener("submit", (e) => {
-        e.preventDefault(); // Prevent the default form submission
+    // Function to get the selected payment method
+    const getSelectedPaymentMethod = () => {
+        return Array.from(paymentOptions).find(option => option.checked)?.value || null;
+    };
 
+    // Handle payment form submission
+    paymentForm.addEventListener("submit", (e) => {
+        e.preventDefault();
         const selectedPaymentMethod = getSelectedPaymentMethod();
 
         if (!selectedPaymentMethod) {
@@ -150,71 +106,24 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // Determine the form action based on the selected payment method
-        let formAction;
-        switch (selectedPaymentMethod) {
-            case "gcash":
-            case "paymaya":
-            case "cash":
-                formAction = "process_payment.php"; // Process payment and redirect
-                break;
-            default:
-                formAction = "staff.php"; // Default to staff.php
-        }
-
-        // Prepare the order data
-        const cartItems = [];
-        const cartList = document.querySelectorAll('#cart-items li');
-        cartList.forEach(item => {
-            const name = item.getAttribute('data-name');
-            const price = parseFloat(item.getAttribute('data-price'));
-            const quantity = parseInt(item.getAttribute('data-quantity'));
-            const canteen = item.getAttribute('data-canteen');
-            cartItems.push({ name, price, quantity, canteen });
-        });
-
-        // Create a hidden form to submit the order
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = formAction; // Set the form action dynamically
+        form.action = selectedPaymentMethod === "gcash" || selectedPaymentMethod === "paymaya" || selectedPaymentMethod === "cash"
+            ? "process_payment.php" : "staff.php";
 
-        const cartInput = document.createElement('input');
-        cartInput.type = 'hidden';
-        cartInput.name = 'cart_items';
-        cartInput.value = JSON.stringify(cartItems);
-        form.appendChild(cartInput);
-
-        const canteenInput = document.createElement('input');
-        canteenInput.type = 'hidden';
-        canteenInput.name = 'canteen';
-        canteenInput.value = currentCanteen; // Include the selected canteen
-        form.appendChild(canteenInput);
-
-        const paymentMethodInput = document.createElement('input');
-        paymentMethodInput.type = 'hidden';
-        paymentMethodInput.name = 'payment_method'; // Ensure this matches the key in PHP
-        paymentMethodInput.value = selectedPaymentMethod;
-        form.appendChild(paymentMethodInput);
-
-        const totalAmountInput = document.createElement('input');
-        totalAmountInput.type = 'hidden';
-        totalAmountInput.name = 'total_amount';
-        totalAmountInput.value = totalAmount.toFixed(2);
-        form.appendChild(totalAmountInput);
+        form.append(createHiddenInput("cart_items", JSON.stringify(cart)));
+        form.append(createHiddenInput("canteen", currentCanteen));
+        form.append(createHiddenInput("payment_method", selectedPaymentMethod));
+        form.append(createHiddenInput("total_amount", totalAmount.toFixed(2)));
 
         document.body.appendChild(form);
         form.submit();
     });
 
-    // Function to get the selected payment method
-    const getSelectedPaymentMethod = () => {
-        return Array.from(paymentOptions).find(option => option.checked)?.value || null;
-    };
-
-    // Event listener for removing items from the cart
+    // Handle item removal
     cartItemsContainer.addEventListener("click", (e) => {
         if (e.target.classList.contains("remove-item")) {
-            const itemIndex = e.target.dataset.index;
+            const itemIndex = parseInt(e.target.dataset.index);
             totalAmount -= cart[itemIndex].price * cart[itemIndex].quantity;
             cart.splice(itemIndex, 1);
             updateCartDisplay();
@@ -222,50 +131,39 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Event listener for the hamburger menu
+    // Hamburger menu toggle
     hamburgerMenu.addEventListener("click", () => {
         menuOptions.classList.toggle("active");
-
-        const [topLine, middleLine, bottomLine] = [
-            document.getElementById("top-line"),
-            document.getElementById("middle-line"),
-            document.getElementById("bottom-line")
-        ];
-
+        const lines = ["top-line", "middle-line", "bottom-line"].map(id => document.getElementById(id));
         if (menuOptions.classList.contains("active")) {
-            topLine.style.transform = "translateY(10px) rotate(45deg)";
-            middleLine.style.opacity = "0";
-            bottomLine.style.transform = "translateY(-10px) rotate(-45deg)";
+            lines[0].style.transform = "translateY(10px) rotate(45deg)";
+            lines[1].style.opacity = "0";
+            lines[2].style.transform = "translateY(-10px) rotate(-45deg)";
         } else {
-            topLine.style.transform = "translateY(0) rotate(0)";
-            middleLine.style.opacity = "1";
-            bottomLine.style.transform = "translateY(0) rotate(0)";
+            lines.forEach(line => { line.style.transform = ""; line.style.opacity = ""; });
         }
     });
 
-    // Event listener to close the hamburger menu when clicking outside
+    // Close menu when clicking outside
     document.addEventListener("click", (e) => {
         if (!hamburgerMenu.contains(e.target) && !menuOptions.contains(e.target)) {
             menuOptions.classList.remove("active");
-
-            document.getElementById("top-line").style.transform = "translateY(0) rotate(0)";
-            document.getElementById("middle-line").style.opacity = "1";
-            document.getElementById("bottom-line").style.transform = "translateY(0) rotate(0)";
+            ["top-line", "middle-line", "bottom-line"].forEach(id => {
+                const line = document.getElementById(id);
+                line.style.transform = "";
+                line.style.opacity = "";
+            });
         }
     });
 
-    // Function to show a toast message
+    // Function to show toast message
     const showToast = (message) => {
         const toast = document.createElement("div");
         toast.className = "toast";
         toast.textContent = message;
         document.body.appendChild(toast);
-
         setTimeout(() => toast.classList.add("show"), 100);
-        setTimeout(() => {
-            toast.classList.remove("show");
-            toast.remove();
-        }, 3000);
+        setTimeout(() => { toast.classList.remove("show"); toast.remove(); }, 3000);
     };
 
     // Function to create a hidden input field
@@ -277,6 +175,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return input;
     };
 
-    // Show Canteen 1 items by default on page load
+    // Show Canteen 1 items by default
     filterItems("Canteen 1");
 });
