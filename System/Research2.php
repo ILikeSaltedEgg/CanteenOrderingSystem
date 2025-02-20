@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
     $email = $_SESSION['email']; // Use email instead of username
 
     // Insert the order into the database
-    $insertOrderQuery = "INSERT INTO orders (email, total_price, order_status) VALUES (?, ?, 'pending')";
+    $insertOrderQuery = "INSERT INTO orders (email, total_price, order_status, note) VALUES (?, ?, 'pending', ?)";
     $stmt = $conn->prepare($insertOrderQuery);
     $stmt->bind_param("sd", $email, $total_amount);
     if ($stmt->execute()) {
@@ -61,16 +61,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
         foreach ($cart_items as $item) {
             $stmt->bind_param("isdis", $order_id, $item['name'], $item['price'], $item['quantity'], $item['canteen']);
             $stmt->execute();
-        }
-
-        // Insert order note if provided
-        if (!empty($order_note)) {
-            $insertNoteQuery = "INSERT INTO order_notes (order_id, note) VALUES (?, ?)";
-            $stmt = $conn->prepare($insertNoteQuery);
-            $stmt->bind_param("is", $order_id, $order_note);
-            if (!$stmt->execute()) {
-                $_SESSION['message'] = "Failed to add note.";
-            }
         }
 
         $_SESSION['message'] = "Order placed successfully.";
@@ -464,10 +454,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
                 </div>
                 <!-- Menu items here -->
 
-                <div id="cart-container">
-                    <h3>Your Order</h3>
-                <div id="user-details">
-                    <?php if (isset($_SESSION['email'])): ?>
+            </div>
+        </section>
+
+        <div id="cart-container">
+                <h3>Your Order</h3>
+            <div id="user-details">
+            <?php if (isset($_SESSION['email'])): ?>
                         <p><strong>Name:</strong> <span id="user_name"><?= htmlspecialchars($username) ?></p>
                     <?php else: ?>
                         <p><strong>Name:</strong> <span id="user-name">[User Name]</span></p>
@@ -489,16 +482,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
                         <p><strong>Contact:</strong> <span id="user_section"><?= htmlspecialchars($user_contact) ?></p>
                     <?php else: ?>
                         <p><strong>Contact:</strong> <span id="user-section">[User Contact]</span></p>
-                    <?php endif; ?>
-                </div>
+                    <?php endif; ?>      
+            </div>
 
-                <ul id="cart-items"></ul>
+            <ul id="cart-items"></ul>
                 <p id="cart-total">Total: ₱0</p>
                 <button id="clear-cart-button" onclick="clearCart()">Clear Cart</button>
-                <button id="order-button" onclick="openModal()">Order Now</button>
-                </div>
-            </div>
-        </section>
+                <button id="order-button" onclick="openModal()">Order Now</button>    
+        </div>
 
 
         <div id="payment-modal" class="modal" style="display: none;">
@@ -546,6 +537,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
     </div>
 </div>
     </main>
+
+    <input type="hidden" id="hidden-order-id" value="<?= htmlspecialchars($order_id ?? '') ?>">
+
+    <script>
+        function checkOrderStatus() {
+            const orderId = document.getElementById('hidden-order-id').value;
+            if (!orderId) return;
+
+            fetch('check_order_status.php?order_id=' + orderId)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'in progress') {
+                        showToast('Your order is in progress!');
+                        clearInterval(interval); // Stop polling once the status is updated
+                    }
+                })
+                .catch(error => console.error('Error checking order status:', error));
+        }
+
+        const interval = setInterval(checkOrderStatus, 5000); // Check every 5 seconds
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000); // Remove toast after 3 seconds
+        }
+    </script>
 
     <script src="../JsSystem/script1.js"></script>
     <?php include 'footer.php'; ?>
