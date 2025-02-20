@@ -18,105 +18,106 @@ if (!isset($_SESSION['usertype']) || $_SESSION['usertype'] !== 'super_admin') {
     exit();
 }
 
-// Fetch orders with item names from order_items
-$orders_query = "
+// Fetch order counts for the dashboard
+$statusCounts = [];
+$statusQuery = "
+    SELECT order_status, COUNT(*) AS count
+    FROM orders
+    GROUP BY order_status
+";
+$statusResult = $conn->query($statusQuery);
+if ($statusResult && $statusResult->num_rows > 0) {
+    while ($row = $statusResult->fetch_assoc()) {
+        $statusCounts[$row['order_status']] = $row['count'];
+    }
+}
+
+// Fetch all orders
+$orders = [];
+$orderQuery = "
     SELECT o.order_id, 
            u.username, 
-           o.email,
-           o.total_price, 
+           u.section, 
+           u.track,
            o.order_date, 
-           o.canteen, 
-           GROUP_CONCAT(oi.item_name SEPARATOR ', ') AS item_names
+           o.total_price,  
+           o.order_status, 
+           o.canteen,  
+           o.note,  -- Fetch the note from the orders table
+           GROUP_CONCAT(oi.item_name SEPARATOR ', ') AS item_names, 
+           GROUP_CONCAT(oi.quantity SEPARATOR ', ') AS quantities
     FROM orders o
     JOIN users u ON o.username = u.username
     LEFT JOIN order_items oi ON o.order_id = oi.order_id
     GROUP BY o.order_id
     ORDER BY o.order_date DESC
 ";
-$orders_result = mysqli_query($conn, $orders_query);
 
-if (!$orders_result) {
-    die("Query failed: " . mysqli_error($conn));
+$orderResult = $conn->query($orderQuery);
+if ($orderResult && $orderResult->num_rows > 0) {
+    $orders = $orderResult->fetch_all(MYSQLI_ASSOC);
 }
 
+// Fetch all users
 $users_query = "SELECT * FROM users";
-$users_result = mysqli_query($conn, $users_query);
-
-if (!$users_result) {
-    die("Query failed: " . mysqli_error($conn));
-}
+$users_result = $conn->query($users_query);
 
 // Fetch dashboard statistics
 $total_users_query = "SELECT COUNT(*) AS total_users FROM users";
-$total_users_result = mysqli_query($conn, $total_users_query);
-$total_users = mysqli_fetch_assoc($total_users_result)['total_users'];
+$total_users = $conn->query($total_users_query)->fetch_assoc()['total_users'];
 
 $online_users_query = "SELECT COUNT(*) AS online_users FROM users WHERE last_activity > NOW() - INTERVAL 5 MINUTE";
-$online_users_result = mysqli_query($conn, $online_users_query);
-$online_users = mysqli_fetch_assoc($online_users_result)['online_users'];
+$online_users = $conn->query($online_users_query)->fetch_assoc()['online_users'];
 
 $total_orders_query = "SELECT COUNT(*) AS total_orders FROM orders";
-$total_orders_result = mysqli_query($conn, $total_orders_query);
-$total_orders = mysqli_fetch_assoc($total_orders_result)['total_orders'];
+$total_orders = $conn->query($total_orders_query)->fetch_assoc()['total_orders'];
 
-if (isset($_POST['validate_users'])) {
-    $validate_query = "UPDATE users SET school_valid = CASE
-                       WHEN username LIKE '%@arellano.edu%' THEN 1
-                       ELSE 0 END";
-    if (!mysqli_query($conn, $validate_query)) {
-        die("Validation query failed: " . mysqli_error($conn));
+// Handle order status updates
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id'], $_POST['order_status'])) {
+    $order_id = intval($_POST['order_id']);
+    $order_status = $conn->real_escape_string($_POST['order_status']);
+
+    $updateQuery = "UPDATE orders SET order_status = ? WHERE order_id = ?";
+    $stmt = $conn->prepare($updateQuery);
+    $stmt->bind_param("si", $order_status, $order_id);
+    $stmt->execute();
+    $stmt->close();
+    header("Location: super_admin.php");
+    exit();
+}
+
+// Handle order deletion
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_order'], $_POST['order_id'])) {
+    $order_id = intval($_POST['order_id']);
+
+    $deleteQuery = "DELETE FROM orders WHERE order_id = ?";
+    $stmt = $conn->prepare($deleteQuery);
+    $stmt->bind_param("i", $order_id);
+    if ($stmt->execute()) {
+        $_SESSION['message'] = "Order #{$order_id} has been deleted.";
+    } else {
+        $_SESSION['message'] = "Failed to delete order #{$order_id}.";
     }
+    $stmt->close();
+    header("Location: super_admin.php");
+    exit();
+}
+
+// Handle user validation
+if (isset($_POST['validate_users'])) {
+    $validate_query = "UPDATE users SET school_valid = 1 WHERE email LIKE '%@arellano.edu%'";
+    $conn->query($validate_query);
     header("Location: super_admin.php");
     exit();
 }
 
 if (isset($_POST['validate_user'])) {
     $user_id = (int) $_POST['user_id'];
-    $validate_user_query = "UPDATE users SET school_valid = 1 WHERE id = '$user_id'";
-    if (!mysqli_query($conn, $validate_user_query)) {
-        die("Validation query failed: " . mysqli_error($conn));
-    }
-    header("Location: super_admin.php");
-    exit();
-}
-
-if (isset($_POST['add_order'])) {
-    $user_id = mysqli_real_escape_string($conn, $_POST['user_id']);
-    $item_name = mysqli_real_escape_string($conn, $_POST['item_name']);
-
-    $check_valid_query = "SELECT school_valid FROM users WHERE id = '$user_id'";
-    $check_valid_result = mysqli_query($conn, $check_valid_query);
-    $valid_user = mysqli_fetch_assoc($check_valid_result);
-
-    if ($valid_user['school_valid'] == 0) {
-        echo "You must be validated to place an order.";
-        exit();
-    }
-
-    $add_order_query = "INSERT INTO orders (user_id, item_name) VALUES ('$user_id', '$item_name')";
-    if (!mysqli_query($conn, $add_order_query)) {
-        die("Add order query failed: " . mysqli_error($conn));
-    }
-    header("Location: super_admin.php");
-    exit();
-}
-
-if (isset($_GET['delete_order_id'])) {
-    $order_id = (int) $_GET['delete_order_id'];
-    $delete_order_query = "DELETE FROM orders WHERE order_id = '$order_id'";
-    if (!mysqli_query($conn, $delete_order_query)) {
-        die("Delete order query failed: " . mysqli_error($conn));
-    }
-    header("Location: super_admin.php");
-    exit();
-}
-
-if (isset($_GET['delete_user_id'])) {
-    $user_id = (int) $_GET['delete_user_id'];
-    $delete_user_query = "DELETE FROM users WHERE id = '$user_id'";
-    if (!mysqli_query($conn, $delete_user_query)) {
-        die("Delete user query failed: " . mysqli_error($conn));
-    }
+    $validate_user_query = "UPDATE users SET school_valid = 1 WHERE id = ?";
+    $stmt = $conn->prepare($validate_user_query);
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $stmt->close();
     header("Location: super_admin.php");
     exit();
 }
@@ -159,17 +160,6 @@ if (isset($_GET['delete_user_id'])) {
             font-weight: bold;
             color: #555;
         }
-        .btn-validate-user {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .btn-validate-user:hover {
-            background-color: #45a049;
-        }
     </style>
 </head>
 <body>
@@ -182,15 +172,15 @@ if (isset($_GET['delete_user_id'])) {
     <div class="dashboard">
         <div class="dashboard-item">
             <h3>Total Users</h3>
-            <p><?php echo $total_users; ?></p>
+            <p><?= $total_users ?></p>
         </div>
         <div class="dashboard-item">
             <h3>Online Users</h3>
-            <p><?php echo $online_users; ?></p>
+            <p><?= $online_users ?></p>
         </div>
         <div class="dashboard-item">
             <h3>Total Orders</h3>
-            <p><?php echo $total_orders; ?></p>
+            <p><?= $total_orders ?></p>
         </div>
     </div>
 
@@ -216,24 +206,24 @@ if (isset($_GET['delete_user_id'])) {
                     </tr>
                 </thead>
                 <tbody>
-                    <?php while ($user = mysqli_fetch_assoc($users_result)) { ?>
+                    <?php while ($user = $users_result->fetch_assoc()) { ?>
                         <tr>
-                            <td><?php echo htmlspecialchars($user['id']); ?></td>
-                            <td><?php echo htmlspecialchars($user['username']); ?></td>
-                            <td><?php echo htmlspecialchars($user['email']); ?></td>
-                            <td><?php echo htmlspecialchars($user['usertype']); ?></td>
-                            <td><?php echo htmlspecialchars($user['section']); ?></td>
-                            <td><?php echo htmlspecialchars($user['track']); ?></td>
-                            <td><?php echo $user['school_valid'] ? 'Yes' : 'No'; ?></td>
+                            <td><?= htmlspecialchars($user['id']) ?></td>
+                            <td><?= htmlspecialchars($user['username']) ?></td>
+                            <td><?= htmlspecialchars($user['email']) ?></td>
+                            <td><?= htmlspecialchars($user['usertype']) ?></td>
+                            <td><?= htmlspecialchars($user['section']) ?></td>
+                            <td><?= htmlspecialchars($user['track']) ?></td>
+                            <td><?= $user['school_valid'] ? 'Yes' : 'No' ?></td>
                             <td>
                                 <form method="POST" action="" style="display: inline;">
-                                    <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
+                                    <input type="hidden" name="user_id" value="<?= $user['id'] ?>">
                                     <button type="submit" name="validate_user" class="btn-validate-user">Validate</button>
                                 </form>
                             </td>
-                            <td><?php echo htmlspecialchars($user['created_at']); ?></td>
+                            <td><?= htmlspecialchars($user['created_at']) ?></td>
                             <td>
-                                <a href="super_admin.php?delete_user_id=<?php echo $user['id']; ?>" class="btn-delete">Remove</a>
+                                <a href="super_admin.php?delete_user_id=<?= $user['id'] ?>" class="btn-delete">Remove</a>
                             </td>
                         </tr>
                     <?php } ?>
@@ -243,44 +233,61 @@ if (isset($_GET['delete_user_id'])) {
 
         <section class="order-management">
             <h2>Manage Orders</h2>
-            <form method="POST" action="">
-                <label for="user_id">User ID:</label>
-                <input type="number" name="user_id" id="user_id" required>
-                <label for="order_details">Order Details:</label>
-                <textarea name="order_details" id="order_details" rows="4" required></textarea>
-                <button type="submit" name="add_order" class="btn-add">Add Order</button>
-            </form>
-
             <table>
                 <thead>
                     <tr>
                         <th>Order ID</th>
-                        <th>User</th>
+                        <th>Username</th>
                         <th>Section</th>
                         <th>Track</th>
-                        <th>Item Names</th>
-                        <th>Canteen</th>
+                        <th>Order Date</th>
                         <th>Total Price</th>
-                        <th>Created At</th>
+                        <th>Order Status</th>
+                        <th>Item Names</th>
+                        <th>Quantities</th>
+                        <th>Canteen</th>
+                        <th>Note</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php while ($order = mysqli_fetch_assoc($orders_result)) { ?>
+                    <?php if (!empty($orders)): ?>
+                        <?php foreach ($orders as $order): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($order['order_id']) ?></td>
+                                <td><?= htmlspecialchars($order['username']) ?></td>
+                                <td><?= htmlspecialchars($order['section']) ?></td>
+                                <td><?= htmlspecialchars($order['track']) ?></td>
+                                <td><?= htmlspecialchars($order['order_date']) ?></td>
+                                <td>₱<?= htmlspecialchars($order['total_price']) ?></td>
+                                <td><?= htmlspecialchars($order['order_status']) ?></td>
+                                <td><?= htmlspecialchars($order['item_names']) ?></td>
+                                <td><?= htmlspecialchars($order['quantities']) ?></td>
+                                <td><?= htmlspecialchars($order['canteen']) ?></td>
+                                <td><?= htmlspecialchars($order['note']) ?></td>
+                                <td>
+                                    <form method="post" style="display: inline;">
+                                        <input type="hidden" name="order_id" value="<?= $order['order_id'] ?>">
+                                        <select name="order_status">
+                                            <option value="Pending" <?= $order['order_status'] === 'Pending' ? 'selected' : '' ?>>Pending</option>
+                                            <option value="In Progress" <?= $order['order_status'] === 'In Progress' ? 'selected' : '' ?>>In Progress</option>
+                                            <option value="Completed" <?= $order['order_status'] === 'Completed' ? 'selected' : '' ?>>Completed</option>
+                                            <option value="Cancelled" <?= $order['order_status'] === 'Cancelled' ? 'selected' : '' ?>>Cancelled</option>
+                                        </select>
+                                        <button type="submit">Update</button>
+                                    </form>
+                                    <form method="post" style="display: inline;">
+                                        <input type="hidden" name="order_id" value="<?= $order['order_id'] ?>">
+                                        <button type="submit" name="delete_order" class="btn-delete">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
                         <tr>
-                            <td><?php echo htmlspecialchars($order['order_id']); ?></td>
-                            <td><?php echo htmlspecialchars($order['username']); ?></td>
-                            <td><?php echo htmlspecialchars($order['item_names']); ?></td>
-                            <td><?php echo htmlspecialchars($order['section']); ?></td>
-                            <td><?php echo htmlspecialchars($order['track']); ?></td>
-                            <td><?php echo htmlspecialchars($order['canteen']); ?></td>
-                            <td>₱<?php echo htmlspecialchars($order['total_price']); ?></td>
-                            <td><?php echo htmlspecialchars($order['order_date']); ?></td>
-                            <td>
-                                <a href="super_admin.php?delete_order_id=<?php echo $order['order_id']; ?>" class="btn-delete">Delete</a>
-                            </td>
+                            <td colspan="12">No orders found.</td>
                         </tr>
-                    <?php } ?>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </section>

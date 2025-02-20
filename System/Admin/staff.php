@@ -43,17 +43,17 @@ $orderQuery = "
     SELECT o.order_id, 
            u.username, 
            u.section, 
+           u.track,
            o.order_date, 
            o.total_price,  
            o.order_status, 
            o.canteen,  
+           o.note,  -- Fetch the note from the orders table
            GROUP_CONCAT(oi.item_name SEPARATOR ', ') AS item_names, 
-           GROUP_CONCAT(oi.quantity SEPARATOR ', ') AS quantities, 
-           order_notes.note AS order_note
+           GROUP_CONCAT(oi.quantity SEPARATOR ', ') AS quantities
     FROM orders o
     JOIN users u ON o.email = u.email
     LEFT JOIN order_items oi ON o.order_id = oi.order_id
-    LEFT JOIN order_notes ON o.order_id = order_notes.order_id
     GROUP BY o.order_id
     ORDER BY o.order_date DESC
 ";
@@ -219,12 +219,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_order'], $_POS
                     <td><?= htmlspecialchars($order['item_names']) ?></td>
                     <td><?= htmlspecialchars($order['quantities']) ?></td>
                     <td><?= htmlspecialchars($order['canteen']) ?></td> 
-                    <td>
-                        <form method="post" style="display: inline;">
-                            <input type="hidden" name="order_id" value="<?= htmlspecialchars($order['order_id']) ?>">
-                            <textarea name="order_note" rows="4"><?= htmlspecialchars($order['order_note']) ?></textarea>
-                        </form>
-                    </td>
+                    <td><?= htmlspecialchars($order['note']) ?></td>
                     <td>
                         <form method="post" style="display: inline;">
                             <input type="hidden" name="order_id" value="<?= htmlspecialchars($order['order_id']) ?>">
