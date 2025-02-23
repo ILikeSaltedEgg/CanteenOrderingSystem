@@ -111,6 +111,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['note'])) {
         <p>Buying again? Want to order something else?</p>
         <a href="research2.php">Go Back</a>
 
+        <input type="hidden" id="hidden-order-id" value="<?= $_SESSION['order_id'] ?? '' ?>">
+
+        <script>
+            
+        function checkOrderStatus() {
+        const orderId = document.getElementById('hidden-order-id').value;
+        if (!orderId) return;
+
+        fetch('check_order_status.php?order_id=' + orderId)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status) {
+                    if (data.status === 'Pending') {
+                        showToast('Your order is Pending!');
+                    } else if (data.status === 'In Progress') {
+                        showToast('Your order is now in progress!');
+                    } else if (data.status === 'Completed') {
+                        showToast('Your order is ready for pickup!');
+                    } else if (data.status === 'Cancelled') {
+                        showToast('Your order is ready for pickup!');
+                    }
+                } else {
+                    console.error('Error:', data.error);
+                }
+            })
+            .catch(error => console.error('Error checking order status:', error));
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+
+        setInterval(checkOrderStatus, 5000);
+        </script>
+
         <div id="timer-box" class="timer">
             <p id="timer-display"></p>
         </div>

@@ -45,3 +45,15 @@ CREATE TABLE users (
     username VARCHAR(255) UNIQUE NOT NULL,
     usertype VARCHAR(255) NOT NULL DEFAULT 'user'
 );
+
+CREATE TABLE activity_log (
+    log_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    username VARCHAR(255),
+    action VARCHAR(255),
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ip_address VARCHAR(45),
+    user_agent TEXT,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+

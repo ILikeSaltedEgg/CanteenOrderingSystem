@@ -35,41 +35,62 @@ if (isset($_SESSION['email'])) { // Use email instead of username
     $_SESSION['section'] = $user_section;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST['total_amount'], $_POST['order_note'])) {
-    // Check if the user is valid to order
-    if (!$is_valid_to_order) {
-        $_SESSION['message'] = "You are not authorized to place an order. Please verify your school ID.";
-        header("Location: research1.php"); // Redirect to the homepage or a verification page
-        exit();
-    }
-
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST['total_amount'])) {
     $cart_items = json_decode($_POST['cart_items'], true);
     $total_amount = floatval($_POST['total_amount']);
-    $order_note = $conn->real_escape_string($_POST['order_note']);
-    $email = $_SESSION['email']; // Use email instead of username
+
+    // Debug: Check the structure of cart_items
+    echo "<pre>";
+    print_r($cart_items);
+    echo "</pre>";
+    // Remove or comment out the exit() statement to allow the script to continue
+    // exit();
 
     // Insert the order into the database
     $insertOrderQuery = "INSERT INTO orders (email, total_price, order_status, note) VALUES (?, ?, 'pending', ?)";
     $stmt = $conn->prepare($insertOrderQuery);
     $stmt->bind_param("sd", $email, $total_amount);
+
     if ($stmt->execute()) {
         $order_id = $stmt->insert_id;
 
         // Insert order items into the database
         $insertOrderItemsQuery = "INSERT INTO order_items (order_id, item_name, price, quantity, canteen) VALUES (?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($insertOrderItemsQuery);
+
+        // Prepare the stock update query
+        $updateStockQuery = "UPDATE food_inventory SET stock_quantity = stock_quantity - ? WHERE item_name = ?";
+        $stmtUpdateStock = $conn->prepare($updateStockQuery);
+
+        if (!$stmtUpdateStock) {
+            die("Error preparing stock update query: " . $conn->error);
+        }
+
         foreach ($cart_items as $item) {
+            // Check if the item has a valid quantity
+            if (!isset($item['quantity']) || $item['quantity'] <= 0) {
+                $_SESSION['message'] = "Invalid quantity for item: " . $item['name'];
+                header("Location: research2.php");
+                exit();
+            }
+
+            // Insert order item
             $stmt->bind_param("isdis", $order_id, $item['name'], $item['price'], $item['quantity'], $item['canteen']);
             $stmt->execute();
+
+            // Update stock quantity
+            $stmtUpdateStock->bind_param("is", $item['quantity'], $item['name']);
+            $stmtUpdateStock->execute();
         }
 
         $_SESSION['message'] = "Order placed successfully.";
         $stmt->close();
+        $stmtUpdateStock->close();
     } else {
         $_SESSION['message'] = "Failed to place order.";
     }
 
-    header("Location: ./system/staff.php");
+    header("Location: research2.php");
     exit();
 }
 ?>
@@ -486,9 +507,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
             </div>
 
             <ul id="cart-items"></ul>
-                <p id="cart-total">Total: ₱0</p>
-                <button id="clear-cart-button" onclick="clearCart()">Clear Cart</button>
-                <button id="order-button" onclick="openModal()">Order Now</button>    
+            <p id="cart-total">Total: ₱0</p>
+            <button id="clear-cart-button" onclick="clearCart()">Clear Cart</button>
+            <button id="order-button" onclick="openModal()">Order Now</button>    
         </div>
 
 
@@ -537,35 +558,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
     </div>
 </div>
     </main>
-
-    <input type="hidden" id="hidden-order-id" value="<?= htmlspecialchars($order_id ?? '') ?>">
-
-    <script>
-        function checkOrderStatus() {
-            const orderId = document.getElementById('hidden-order-id').value;
-            if (!orderId) return;
-
-            fetch('check_order_status.php?order_id=' + orderId)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'in progress') {
-                        showToast('Your order is in progress!');
-                        clearInterval(interval); // Stop polling once the status is updated
-                    }
-                })
-                .catch(error => console.error('Error checking order status:', error));
-        }
-
-        const interval = setInterval(checkOrderStatus, 5000); // Check every 5 seconds
-
-        function showToast(message) {
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000); // Remove toast after 3 seconds
-        }
-    </script>
 
     <script src="../JsSystem/script1.js"></script>
     <?php include 'footer.php'; ?>

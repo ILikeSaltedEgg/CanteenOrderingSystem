@@ -11,6 +11,22 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// Debug: Check POST data
+echo "<pre>";
+print_r($_POST);
+echo "</pre>";
+
+// Function to log activities
+function logActivity($conn, $user_id, $username, $action) {
+    $ip_address = $_SERVER['REMOTE_ADDR'];
+    $user_agent = $_SERVER['HTTP_USER_AGENT'];
+
+    $stmt = $conn->prepare("INSERT INTO activity_log (user_id, username, action, ip_address, user_agent) VALUES (?, ?, ?, ?, ?)");
+    $stmt->bind_param("issss", $user_id, $username, $action, $ip_address, $user_agent);
+    $stmt->execute();
+    $stmt->close();
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Check if the user is logged in
     if (!isset($_SESSION['email'])) {
@@ -22,7 +38,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $paymentMethod = $_POST['payment_method'] ?? '';
     $totalAmount = $_POST['total_amount'] ?? 0;
     $canteen = $_POST['canteen'] ?? '';
-    $note = $_POST['note'] ?? '';
+    $note = $_POST['note'] ?? ''; // Retrieve the note from the form
+    $cart_items = json_decode($_POST['cart_items'], true) ?? [];
+
+    // Debug: Check the note value
+    echo "Note: " . $note;
 
     // Validate required fields
     if (empty($paymentMethod)) {
@@ -49,7 +69,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $order_status = 'Pending';
     $email = $_SESSION['email']; // Use email from session
 
-    // Prepare the SQL statement for inserting into the `orders` table
+    // Get user details
+    $userQuery = $conn->prepare("SELECT id, username FROM users WHERE email = ?");
+    $userQuery->bind_param("s", $email);
+    $userQuery->execute();
+    $userResult = $userQuery->get_result();
+    $userQuery->close();
+
+    if ($userResult->num_rows === 0) {
+        $_SESSION['message'] = "User not found.";
+        header("Location: research2.php");
+        exit();
+    }
+
+    $user = $userResult->fetch_assoc();
+    $user_id = $user['id'];
+    $username = $user['username'];
+    
+    // Insert order into `orders` table
     $stmt = $conn->prepare("INSERT INTO orders (total_price, email, order_status, canteen, order_date, note) VALUES (?, ?, ?, ?, ?, ?)");
     $stmt->bind_param("dsssss", $totalAmount, $email, $order_status, $canteen, $order_date, $note);
 
@@ -57,14 +94,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $order_id = $stmt->insert_id; // Get the ID of the newly inserted order
         $stmt->close();
 
-        // Insert order items into the `order_items` table
-        $cartData = $_POST['cart_items'] ?? '[]'; // Ensure it's a valid JSON array
-        $cartItems = json_decode($cartData, true) ?? [];
+        // Log order placement
+        logActivity($conn, $user_id, $username, "User placed an order (Order ID: $order_id)");
 
-        if (is_array($cartItems) && !empty($cartItems)) {
+        // Insert order items into the `order_items` table
+        if (is_array($cart_items) && !empty($cart_items)) {
             $stmt = $conn->prepare("INSERT INTO order_items (order_id, item_name, price, quantity, total_price) VALUES (?, ?, ?, ?, ?)");
             
-            foreach ($cartItems as $item) {
+            foreach ($cart_items as $item) {
                 if (!isset($item['name'], $item['price'], $item['quantity'])) continue;
 
                 $item_name = $item['name'];
@@ -74,6 +111,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $stmt->bind_param("isdis", $order_id, $item_name, $price, $quantity, $total_price);
                 $stmt->execute();
+
+                // Log each item added to the order
+                logActivity($conn, $user_id, $username, "Added item to order (Order ID: $order_id, Item: $item_name, Quantity: $quantity)");
+
+                // Update stock quantity in `food_inventory`
+                $updateStockQuery = "UPDATE food_inventory SET stock_quantity = stock_quantity - ? WHERE item_name = ?";
+                $stmtUpdateStock = $conn->prepare($updateStockQuery);
+                $stmtUpdateStock->bind_param("is", $item['quantity'], $item['name']);
+                $stmtUpdateStock->execute();
+                $stmtUpdateStock->close();
             }
             $stmt->close();
         }
@@ -83,7 +130,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['total_amount'] = $totalAmount;
         $_SESSION['timer_duration'] = $timerDuration;
         $_SESSION['canteen'] = $canteen;
-        $_SESSION['note'] = $note;
+        $_SESSION['note'] = $note; // Store the note in the session
+        $_SESSION['order_id'] = $order_id;
 
         // Set QR code URL based on payment method
         $_SESSION['qr_code_url'] = match ($paymentMethod) {

@@ -12,13 +12,23 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+function logActivity($conn, $user_id, $username, $action) {
+    $ip_address = $_SERVER['REMOTE_ADDR'];
+    $user_agent = $_SERVER['HTTP_USER_AGENT'];
+
+    $stmt = $conn->prepare("INSERT INTO activity_log (user_id, username, action, ip_address, user_agent) VALUES (?, ?, ?, ?, ?)");
+    $stmt->bind_param("issss", $user_id, $username, $action, $ip_address, $user_agent);
+    $stmt->execute();
+    $stmt->close();
+}
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = trim($_POST["email"]);
     $pass = trim($_POST["password"]);
+    $remember_me = isset($_POST["stay-logged-in"]) ? true : false;
 
-    // Validate email format
     if (!preg_match("/^[a-zA-Z0-9._%+-]+@aujrc\.shs\.2024$/", $email)) {
-        echo "<script>alert('Invalid email format. Email must be in the format: example@aujrc.shs.2024'); window.location.href='Login.php';</script>";
+        echo "<script>alert('Invalid email format.'); window.location.href='Login.php';</script>";
         exit();
     }
 
@@ -27,21 +37,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
-    $stmt = $conn->prepare("SELECT password, usertype FROM users WHERE email = ?");
+    $stmt = $conn->prepare("SELECT id, username, password, usertype FROM users WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
 
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
-        $hashed_password = $row['password']; // Hashed password from the database
+        $hashed_password = $row['password'];
         $usertype = $row['usertype'];
-    
-        if (password_verify($pass, $hashed_password)) { // Verify the password
+        $user_id = $row['id'];
+        $username = $row['username'];
+
+        if (password_verify($pass, $hashed_password)) {
             $_SESSION["email"] = $email;
             $_SESSION["usertype"] = $usertype;
-    
-            // Redirect based on usertype
+            $_SESSION["username"] = $username;
+            $_SESSION["user_id"] = $user_id;
+
+            logActivity($conn, $user_id, $username, "User logged in");
+
+            if ($remember_me) {
+                $cookie_data = json_encode([
+                    'email' => $email,
+                    'hashed_password' => password_hash($pass, PASSWORD_DEFAULT)
+                ]);
+                setcookie('remember_me', $cookie_data, time() + (86400 * 30), "/");
+            }
+
             if ($usertype == "super_admin") {
                 echo "<script>alert('Welcome, Admin!'); window.location.href='../System/Admin/super_admin.php';</script>";
             } elseif ($usertype == "staff") {
@@ -50,16 +73,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 echo "<script>alert('Welcome, User!'); window.location.href='Research2.php';</script>";
             }
         } else {
+            logActivity($conn, $user_id, $username, "Failed login attempt");
             echo "<script>alert('Incorrect password!'); window.location.href='Login.php';</script>";
         }
     } else {
         echo "<script>alert('Email does not exist!'); window.location.href='Login.php';</script>";
     }
-    
 }
 
 $conn->close();
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -69,7 +93,24 @@ $conn->close();
     <title>Login</title>
     <link rel="stylesheet" type="text/css" href="../Styles/styles1.css">
     <script>
-        localStorage.setItem('userEmail', 'User Email');
+        // Function to pre-fill the email field from local storage
+        function preFillEmail() {
+            const email = localStorage.getItem('userEmail');
+            if (email) {
+                document.getElementById('email').value = email;
+            }
+        }
+
+        // Function to save email to local storage
+        function saveEmail() {
+            const email = document.getElementById('email').value;
+            if (email) {
+                localStorage.setItem('userEmail', email);
+            }
+        }
+
+        // Call preFillEmail when the page loads
+        window.onload = preFillEmail;
     </script>
 </head>
 <body>
@@ -85,7 +126,7 @@ $conn->close();
     <div id="container">
         <div class="box-content">
             <h2>Login</h2>
-            <form action="login.php" method="POST">
+            <form action="login.php" method="POST" onsubmit="saveEmail()">
                 <label for="email">Email:</label>
                 <input type="text" id="email" name="email" placeholder="Enter your Email (example@aujrc.shs.2024)" required>
 
