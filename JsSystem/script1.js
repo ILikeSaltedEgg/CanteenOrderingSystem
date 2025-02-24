@@ -33,8 +33,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Clear the cart
     window.clearCart = function () {
-        cart = [];
-        updateCartDisplay();
+        if (confirm("Are you sure you want to clear your cart?")) {
+            cart = [];
+            updateCartDisplay();
+        }
     };
 
     // Function to add items to the cart
@@ -42,23 +44,42 @@ document.addEventListener("DOMContentLoaded", () => {
         const quantityInput = button.parentElement.querySelector(".quantity-input");
         const quantity = parseInt(quantityInput.value);
         const canteen = button.closest(".menu-item").getAttribute("data-canteen");
-
-        if (!itemName || isNaN(itemPrice) || isNaN(quantity) || quantity <= 0) {
-            showToast("Invalid item or quantity. Please try again.");
+    
+        // Validate quantity
+        if (isNaN(quantity)) {
+            showToast("Invalid quantity. Please enter a valid number.");
             return;
         }
-
-        const existingItem = cart.find(item => item.name === itemName && item.canteen === canteen);
-
-        if (existingItem) {
-            existingItem.quantity += quantity;
-        } else {
-            cart.push({ name: itemName, price: itemPrice, quantity, canteen });
+    
+        if (quantity <= 0) {
+            showToast("Quantity must be greater than 0.");
+            return;
         }
-
-        totalAmount += itemPrice * quantity;
-        updateCartDisplay();
-        showToast(`${itemName} added to cart.`);
+    
+        // Check stock quantity
+        fetch(`../System/Admin/check_stock.php?item_name=${encodeURIComponent(itemName)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.stock_quantity >= quantity) {
+                    const existingItem = cart.find(item => item.name === itemName && item.canteen === canteen);
+    
+                    if (existingItem) {
+                        existingItem.quantity += quantity;
+                    } else {
+                        cart.push({ name: itemName, price: itemPrice, quantity, canteen });
+                    }
+    
+                    totalAmount += itemPrice * quantity;
+                    updateCartDisplay();
+                    showToast(`${itemName} added to cart.`);
+                } else {
+                    showToast(`${itemName} is out of stock.`);
+                }
+            })
+            .catch(error => {
+                console.error("Error checking stock:", error);
+                showToast("Failed to check stock. Please try again.");
+            });
     };
 
     // Function to filter menu items by canteen and category
@@ -100,22 +121,31 @@ document.addEventListener("DOMContentLoaded", () => {
     paymentForm.addEventListener("submit", (e) => {
         e.preventDefault();
         const selectedPaymentMethod = getSelectedPaymentMethod();
-
+    
         if (!selectedPaymentMethod) {
             showToast("Please select a payment method.");
             return;
         }
-
+    
+        // Debug: Check the structure of cart_items
+        console.log("Cart Items:", cart);
+    
+        // Get the note from the textarea
+        const note = document.getElementById("note").value;
+    
+        // Create a form dynamically
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = selectedPaymentMethod === "gcash" || selectedPaymentMethod === "paymaya" || selectedPaymentMethod === "cash"
-            ? "process_payment.php" : "staff.php";
-
+        form.action = "process_payment.php"; // Always submit to process_payment.php
+    
+        // Append hidden inputs for cart_items, canteen, payment_method, total_amount, and note
         form.append(createHiddenInput("cart_items", JSON.stringify(cart)));
         form.append(createHiddenInput("canteen", currentCanteen));
         form.append(createHiddenInput("payment_method", selectedPaymentMethod));
         form.append(createHiddenInput("total_amount", totalAmount.toFixed(2)));
-
+        form.append(createHiddenInput("note", note)); // Include the note
+    
+        // Append the form to the document body and submit it
         document.body.appendChild(form);
         form.submit();
     });
