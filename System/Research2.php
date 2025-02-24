@@ -3,11 +3,11 @@ session_start();
 require 'db_connection.php';
 
 $is_valid_to_order = false;
-$username = "Guest"; // Default username
-$user_track = "N/A"; // Default track
-$user_section = "N/A"; // Default section
+$username = "Guest"; 
+$user_track = "N/A"; 
+$user_section = "N/A"; 
 
-if (isset($_SESSION['email'])) { // Use email instead of username
+if (isset($_SESSION['email'])) { 
     $email = $_SESSION['email'];
 
     // Fetch username and school_valid status
@@ -23,7 +23,7 @@ if (isset($_SESSION['email'])) { // Use email instead of username
         $user_track = $user_data['track']; // Fetch track
         $user_section = $user_data['section']; // Fetch section
         $user_contact = $user_data['contact_number']; // Fetch contact number
-        $is_valid_to_order = (bool) $user_data['school_valid']; // Check if school_valid is 1
+        $is_valid_to_order = (bool) $user_data['school_valid']; // Checking if school_valid is 1
     } else {
         die("Error fetching user data: " . mysqli_error($conn));
     }
@@ -35,16 +35,23 @@ if (isset($_SESSION['email'])) { // Use email instead of username
     $_SESSION['section'] = $user_section;
 }
 
+// Fetch stock quantities for all items
+$stockQuantities = [];
+$stockQuery = "SELECT item_name, stock_quantity FROM food_inventory";
+$stockResult = $conn->query($stockQuery);
+if ($stockResult && $stockResult->num_rows > 0) {
+    while ($row = $stockResult->fetch_assoc()) {
+        $stockQuantities[$row['item_name']] = $row['stock_quantity'];
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST['total_amount'])) {
     $cart_items = json_decode($_POST['cart_items'], true);
     $total_amount = floatval($_POST['total_amount']);
 
-    // Debug: Check the structure of cart_items
     echo "<pre>";
     print_r($cart_items);
     echo "</pre>";
-    // Remove or comment out the exit() statement to allow the script to continue
-    // exit();
 
     // Insert the order into the database
     $insertOrderQuery = "INSERT INTO orders (email, total_price, order_status, note) VALUES (?, ?, 'pending', ?)";
@@ -78,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
             $stmt->bind_param("isdis", $order_id, $item['name'], $item['price'], $item['quantity'], $item['canteen']);
             $stmt->execute();
 
-            // Update stock quantity
+            // Updating stock quantity
             $stmtUpdateStock->bind_param("is", $item['quantity'], $item['name']);
             $stmtUpdateStock->execute();
         }
@@ -155,7 +162,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
             }
             ?>
 
-            <a href="">Contact Staff</a>
+            <a href="../System/staff_contact.php">Contact Staff</a>
             <a href="../System/logout.php" class="logout-button">Logout</a>
         </nav>
     </header>
@@ -180,31 +187,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
         <section id="container">
             <div id="menu-items">
 
-            <div class="menu-item" data-category="meals" data-canteen="Canteen 1">
+                <!-- Menu items here -->
+
+                <div class="menu-item" data-category="meals" data-canteen="Canteen 1">
                     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Adobo_DSCF4391.jpg/1280px-Adobo_DSCF4391.jpg" alt="Chicken Adobo">
-                    <h3>Chicken Adobo</h3>
+                    <h3>Chicken Adobo with Rice</h3>
                     <p>Price: ₱150</p>
                     <div class="cart-controls">
                         <input type="number" class="quantity-input" value="1" min="1">
-                        <button class="add-to-cart" 
-                            <?php if (!$is_valid_to_order) echo 'disabled'; ?> 
-                            onclick="addToCart('Chicken Adobo', 150, this)">
-                            Add to Cart
-                        </button>
+                        <?php
+                        $itemName = "Chicken Adobo";
+                        $stock = $stockQuantities[$itemName] ?? 0;
+                        if ($stock > 0) {
+                            echo '<button class="add-to-cart" 
+                                onclick="addToCart(\'' . $itemName . '\', 150, this)">
+                                Add to Cart
+                                </button>';
+                        } else {
+                            echo '<button class="add-to-cart" disabled>
+                                Out of Stock
+                                </button>';
+                        }
+                        ?>
                     </div>
                 </div>
-
+            
                 <div class="menu-item" data-category="meals" data-canteen="Canteen 1">
-                    <img src="https://www.pinoycookingrecipes.com/uploads/7/6/7/8/7678114/watermark-2019-05-06-09-10-22_orig.jpg" alt="Beef Tapa with Rice">
+                <img src="https://www.pinoycookingrecipes.com/uploads/7/6/7/8/7678114/watermark-2019-05-06-09-10-22_orig.jpg" alt="Beef Tapa with Rice">
                     <h3>Beef Tapa with Rice</h3>
-                    <p>Price: ₱100</p>
+                    <p>Price: ₱60</p>
                     <div class="cart-controls">
                         <input type="number" class="quantity-input" value="1" min="1">
-                        <button class="add-to-cart" 
-                            <?php if (!$is_valid_to_order) echo 'disabled'; ?> 
-                            onclick="addToCart('Beef Tapa with Rice', 100, this)">
-                            Add to Cart
-                        </button>
+                        <?php
+                        $itemName = "Beef Tapa with Rice";
+                        $stock = $stockQuantities[$itemName] ?? 0;
+                        if ($stock > 0) {
+                            echo '<button class="add-to-cart" 
+                                onclick="addToCart(\'' . $itemName . '\', 150, this)">
+                                Add to Cart
+                                </button>';
+                        } else {
+                            echo '<button class="add-to-cart" disabled>
+                                Out of Stock
+                                </button>';
+                        }
+                        ?>
                     </div>
                 </div>
 
@@ -473,7 +500,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
                         </button>
                     </div>
                 </div>
-                <!-- Menu items here -->
 
             </div>
         </section>
@@ -545,7 +571,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
                 <input type="hidden" id="total-amount-input" name="total_amount" value="0">
             </div>
 
-            <!-- Note field added to the same form -->
+            <!-- Note field -->
             <div class="form-group">
                 <label for="note">Note:</label>
                 <textarea id="note" name="note"></textarea>
@@ -560,7 +586,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
     </main>
 
     <script src="../JsSystem/script1.js"></script>
-    <?php include 'footer.php'; ?>
+    <?php include '../System/include/footer.php'; ?>
 
         <div id="timer-box" style="display: none;">
             <p>Estimated Time: <span id="timer">00:00</span></p>

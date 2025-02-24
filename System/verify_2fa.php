@@ -8,8 +8,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $entered_code = $_POST['verification_code'];
 
     if ($entered_code == $_SESSION['2fa_code']) {
-        $_SESSION['username'] = $_SESSION['2fa_user']; // Fully authenticate
-        unset($_SESSION['2fa_code'], $_SESSION['2fa_user']); // Remove 2FA session variables
+        $_SESSION['username'] = $_SESSION['2fa_user'];
+        unset($_SESSION['2fa_code'], $_SESSION['2fa_user']); 
         header("Location: super_admin.php");
         exit();
     } else {

@@ -1,14 +1,12 @@
 <?php
 session_start();
-require_once('../tcpdf/tcpdf.php'); // Ensure TCPDF is installed
+require_once('../tcpdf/tcpdf.php'); 
 
-// Check if the user is logged in
 if (!isset($_SESSION['email'])) {
     header("Location: login.php");
     exit();
 }
 
-// Database connection
 $host = "127.0.0.1";
 $username = "root";
 $password = "";
@@ -21,7 +19,15 @@ if ($conn->connect_error) {
 
 // Fetch the latest order for the logged-in user
 $email = $_SESSION['email'];
-$sql = "SELECT * FROM orders WHERE email = ? ORDER BY order_id DESC LIMIT 1";
+$sql = "
+    SELECT o.order_id, o.order_date, o.total_price, o.canteen, o.note,
+           u.username, u.section, u.track
+    FROM orders o
+    JOIN users u ON o.email = u.email
+    WHERE o.email = ?
+    ORDER BY o.order_id DESC
+    LIMIT 1
+";
 $stmt = $conn->prepare($sql);
 
 if (!$stmt) {
@@ -40,12 +46,13 @@ $order = $result->fetch_assoc();
 $stmt->close();
 
 $order_id = $order['order_id'];
-$order_name = $order['item_name'];
-$order_section = $order['section'];
-$order_track = $order['track'];
+$username = $order['username'];
+$section = $order['section'];
+$track = $order['track'];
 $order_date = $order['order_date'];
 $total_price = number_format($order['total_price'], 2);
 $canteen = $order['canteen'];
+$note = $order['note'];
 
 // Fetch order items
 $sql = "SELECT * FROM order_items WHERE order_id = ?";
@@ -61,30 +68,27 @@ $items = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 $conn->close();
 
-// Create PDF invoice
 $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
 $pdf->SetPrintHeader(false);
 $pdf->SetPrintFooter(false);
 $pdf->AddPage();
-$pdf->SetFont('dejavusans', '', 12); // Use a Unicode-supported font
+$pdf->SetFont('dejavusans', '', 12); 
 $pdf->SetCreator('Canteen System');
 $pdf->SetAuthor('AU Canteen');
 $pdf->SetTitle('Canteen Receipt');
 
-// Define the peso sign
 $peso = '₱';
 
-// HTML content for the invoice
 $html = "
-    <h1 style='text-align: center;'>Invoice</h1>
+    <h1 style='text-align: center;'>Reciept</h1>
     <hr>
     <p><strong>Order ID:</strong> $order_id</p>
-    <p><strong>Section:</strong> $order_section</p>
-    <p><strong>Track:</strong> $order_track</p>
-    <p><strong>Order Name:</strong> $order_name</p>
-    <p><strong>Date:</strong> $order_date</p>
+    <p><strong>Customer Name:</strong> $username</p>
+    <p><strong>Section:</strong> $section</p>
+    <p><strong>Track:</strong> $track</p>
+    <p><strong>Order Date:</strong> $order_date</p>
     <p><strong>Canteen:</strong> $canteen</p>
-    <p><strong>Customer:</strong> $email</p>
+    <p><strong>Note:</strong> $note</p>
     <br>
     <table border='1' cellpadding='5' style='width: 100%;'>
         <tr style='background-color: #f2f2f2;'>
@@ -116,9 +120,7 @@ $html .= "
     <hr>
     <p style='text-align: center;'>Thank you for ordering at AU Canteen!</p>";
 
-// Write HTML content to the PDF
 $pdf->writeHTML($html, true, false, true, false, '');
 
-// Output the PDF for download
 $pdf->Output("invoice_$order_id.pdf", 'D');
 exit();

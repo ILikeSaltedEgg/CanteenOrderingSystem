@@ -34,7 +34,7 @@ include 'db_connection.php';
         }
 
         #logo {
-            height: 120px; /* Adjusted for better proportion */
+            height: 120px; 
             width: auto;
             margin: 0 auto 20px;
             display: block;

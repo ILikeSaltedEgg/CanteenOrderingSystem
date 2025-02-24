@@ -183,7 +183,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
 </head>
 
 <body>
-    <?php include("header.php"); ?>
+    <?php include("../System/include/header.php"); ?>
 
     <main>
         <section class="menu-header"></section>
@@ -437,7 +437,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
     </main>
 
     <script src="../JsSystem/script.js"></script>
-    <?php include 'footer.php'; ?>
+    <?php include '../System/include/footer.php'; ?>
 </body>
 
 </html>
