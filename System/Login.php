@@ -65,10 +65,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 setcookie('remember_me', $cookie_data, time() + (86400 * 30), "/");
             }
 
-            if ($usertype == "super_admin") {
-                echo "<script>alert('Welcome, Admin!'); window.location.href='../System/Admin/super_admin.php';</script>";
-            } elseif ($usertype == "staff") {
-                echo "<script>alert('Welcome, Staff!'); window.location.href='../System/Admin/staff.php';</script>";
+            // Redirect to 2FA verification for super_admin and staff
+            if ($usertype == "super_admin" || $usertype == "staff") {
+
+                $_SESSION['2fa_code'] = "123456"; // Static code for verification
+                $_SESSION['2fa_user'] = $username;
+
+                // Redirect to verify_2fa.php
+                header("Location: verify_2fa.php");
+                exit();
             } else {
                 echo "<script>alert('Welcome, User!'); window.location.href='Research2.php';</script>";
             }
@@ -93,7 +98,6 @@ $conn->close();
     <title>Login</title>
     <link rel="stylesheet" type="text/css" href="../Styles/styles1.css">
     <script>
-        // Function to pre-fill the email field from local storage
         function preFillEmail() {
             const email = localStorage.getItem('userEmail');
             if (email) {
@@ -101,7 +105,6 @@ $conn->close();
             }
         }
 
-        // Function to save email to local storage
         function saveEmail() {
             const email = document.getElementById('email').value;
             if (email) {
@@ -109,7 +112,6 @@ $conn->close();
             }
         }
 
-        // Call preFillEmail when the page loads
         window.onload = preFillEmail;
     </script>
 </head>
