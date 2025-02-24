@@ -38,6 +38,7 @@ if ($statusResult && $statusResult->num_rows > 0) {
 }
 
 // Fetch all orders
+// Fetch all orders
 $orders = [];
 $orderQuery = "
     SELECT o.order_id, 
@@ -66,15 +67,31 @@ if ($orderResult && $orderResult->num_rows > 0) {
 // Handle order status updates
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id'], $_POST['order_status'])) {
     $order_id = intval($_POST['order_id']);
-    $order_status = $conn->real_escape_string($_POST['order_status']);
+    $order_status = $_POST['order_status'];
 
     $updateQuery = "UPDATE orders SET order_status = ? WHERE order_id = ?";
     $stmt = $conn->prepare($updateQuery);
     $stmt->bind_param("si", $order_status, $order_id);
+
+    if ($stmt->execute()) {
+        $_SESSION['toast_message'] = "Order #$order_id status updated to '$order_status'";
+        header("Location: staff.php");
+        exit();
+    } else {
+        $_SESSION['toast_message'] = "Failed to update order status.";
+    }
+}
+
+
+
+// Handle 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id'])) {
+    $order_id = intval($_POST['order_id']);
+    $updateQuery = "UPDATE orders SET order_status = 'in progress' WHERE order_id = ?";
+    $stmt = $conn->prepare($updateQuery);
+    $stmt->bind_param("i", $order_id);
     $stmt->execute();
     $stmt->close();
-    header("Location: staff.php");
-    exit();
 }
 
 // Handle order acceptance
@@ -119,37 +136,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_order'], $_POS
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Staff Panel</title>
     <link rel="stylesheet" text="text/css" href="../../Styles/styles3.css">
-    <style>
-        .dashboard {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 20px;
-            padding: 20px;
-            background-color: #f9f9f9;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .dashboard-item {
-            text-align: center;
-            padding: 15px;
-            border-radius: 8px;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            flex: 1;
-            margin: 0 10px;
-        }
-        .dashboard-item h3 {
-            margin: 0;
-            font-size: 18px;
-            color: #333;
-        }
-        .dashboard-item p {
-            margin: 10px 0 0;
-            font-size: 24px;
-            font-weight: bold;
-            color: #555;
-        }
-    </style>
 </head>
 <body>
 
@@ -165,7 +151,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_order'], $_POS
     </div>
 <?php endif; ?>
 
-<!-- Dashboard -->
 <div class="dashboard">
     <div class="dashboard-item">
         <h3>Pending Orders</h3>
@@ -188,70 +173,69 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_order'], $_POS
 <div class="staff-container">
     <h2>All User Orders</h2>
     <table>
-        <thead>
+    <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Username</th>
+            <th>Section</th>
+            <th>Track</th>
+            <th>Order Date</th>
+            <th>Total Price</th>
+            <th>Order Status</th>
+            <th>Item Names</th>
+            <th>Quantities</th>
+            <th>Canteen</th>  
+            <th>Note</th>
+            <th>Actions</th>
+            <th>Accept</th>
+        </tr>
+    </thead>
+    <tbody>
+    <?php if (!empty($orders)): ?>
+        <?php foreach ($orders as $order): ?>
             <tr>
-                <th>Order ID</th>
-                <th>Username</th>
-                <th>Section</th>
-                <th>Track</th>
-                <th>Order Date</th>
-                <th>Total Price</th>
-                <th>Order Status</th>
-                <th>Item Names</th>
-                <th>Quantities</th>
-                <th>Canteen</th>  
-                <th>Note</th>
-                <th>Actions</th>
-                <th>Accept</th>
+                <td><?= htmlspecialchars($order['order_id']) ?></td>
+                <td><?= htmlspecialchars($order['username']) ?></td>
+                <td><?= htmlspecialchars($order['section']) ?></td>
+                <td><?= htmlspecialchars($order['track']) ?></td>
+                <td><?= htmlspecialchars($order['order_date']) ?></td>
+                <td>₱<?= htmlspecialchars($order['total_price']) ?></td>
+                <td><?= htmlspecialchars($order['order_status']) ?></td>
+                <td><?= htmlspecialchars($order['item_names']) ?></td>
+                <td><?= htmlspecialchars($order['quantities']) ?></td>
+                <td><?= htmlspecialchars($order['canteen']) ?></td> 
+                <td><?= htmlspecialchars($order['note']) ?></td>
+                <td>
+                    <form method="post" style="display: inline;">
+                        <input type="hidden" name="order_id" value="<?= htmlspecialchars($order['order_id']) ?>">
+                        <select name="order_status">
+                            <option value="Pending" <?= $order['order_status'] === 'Pending' ? 'selected' : '' ?>>Pending</option>
+                            <option value="In Progress" <?= $order['order_status'] === 'In Progress' ? 'selected' : '' ?>>In Progress</option>
+                            <option value="Completed" <?= $order['order_status'] === 'Completed' ? 'selected' : '' ?>>Completed</option>
+                            <option value="Cancelled" <?= $order['order_status'] === 'Cancelled' ? 'selected' : '' ?>>Cancelled</option>
+                        </select>
+                        <button type="submit">Update</button>
+                    </form>
+                </td>
+                <td>
+                    <form method="post" style="display: inline;">
+                        <input type="hidden" name="order_id" value="<?= htmlspecialchars($order['order_id']) ?>">
+                        <button type="submit" name="accept_order" class="accept-button">Accept</button>
+                    </form>
+                    <form method="post" style="display: inline;">
+                        <input type="hidden" name="order_id" value="<?= htmlspecialchars($order['order_id']) ?>">
+                        <button type="submit" name="delete_order" class="delete-button">Delete</button>
+                    </form>
+                </td>
             </tr>
-        </thead>
-        <tbody>
-        <?php if (!empty($orders)): ?>
-            <?php foreach ($orders as $order): ?>
-                <tr>
-                    <td><?= htmlspecialchars($order['order_id']) ?></td>
-                    <td><?= htmlspecialchars($order['username']) ?></td>
-                    <td><?= htmlspecialchars($order['section']) ?></td>
-                    <td><?= htmlspecialchars($order['track']) ?></td>
-                    <td><?= htmlspecialchars($order['order_date']) ?></td>
-                    <td>₱<?= htmlspecialchars($order['total_price']) ?></td>
-                    <td><?= htmlspecialchars($order['order_status']) ?></td>
-                    <td><?= htmlspecialchars($order['item_names']) ?></td>
-                    <td><?= htmlspecialchars($order['quantities']) ?></td>
-                    <td><?= htmlspecialchars($order['canteen']) ?></td> 
-                    <td><?= htmlspecialchars($order['note']) ?></td>
-                    <td>
-                        <form method="post" style="display: inline;">
-                            <input type="hidden" name="order_id" value="<?= htmlspecialchars($order['order_id']) ?>">
-                            <select name="order_status">
-                                <option value="Pending" <?= $order['order_status'] === 'Pending' ? 'selected' : '' ?>>Pending</option>
-                                <option value="In Progress" <?= $order['order_status'] === 'In Progress' ? 'selected' : '' ?>>In Progress</option>
-                                <option value="Completed" <?= $order['order_status'] === 'Completed' ? 'selected' : '' ?>>Completed</option>
-                                <option value="Cancelled" <?= $order['order_status'] === 'Cancelled' ? 'selected' : '' ?>>Cancelled</option>
-                            </select>
-                            <button type="submit">Update</button>
-                        </form>
-                        <button class="view-details-button" onclick="viewOrderDetails(<?= htmlspecialchars($order['order_id']) ?>)">View Details</button>
-                    </td>
-                    <td>
-                        <form method="post" style="display: inline;">
-                            <input type="hidden" name="order_id" value="<?= htmlspecialchars($order['order_id']) ?>">
-                            <button type="submit" name="accept_order" class="accept-button">Accept</button>
-                        </form>
-                        <form method="post" style="display: inline;">
-                            <input type="hidden" name="order_id" value="<?= htmlspecialchars($order['order_id']) ?>">
-                            <button type="submit" name="delete_order" class="delete-button">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <tr>
-                <td colspan="12">No orders found.</td>
-            </tr>
-        <?php endif; ?>
-        </tbody>
-    </table>
+        <?php endforeach; ?>
+    <?php else: ?>
+        <tr>
+            <td colspan="12">No orders found.</td>
+        </tr>
+    <?php endif; ?>
+    </tbody>
+</table>
 </div>
 
 <script>
