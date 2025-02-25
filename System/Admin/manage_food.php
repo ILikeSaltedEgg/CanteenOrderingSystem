@@ -68,18 +68,123 @@ $inventoryResult = $conn->query($inventoryQuery);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Food Inventory</title>
     <link rel="stylesheet" href="../../Styles/styles_admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .main-content {
+            margin-left: 250px; /* Adjust based on sidebar width */
+            padding: 20px;
+        }
+
+        .header {
+            margin-bottom: 20px;
+        }
+
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            flex: 1;
+        }
+
+        button[type="submit"] {
+            padding: 10px 20px;
+            background: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button[type="submit"]:hover {
+            background: #0056b3;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #f8f9fa;
+        }
+
+        tr:hover {
+            background: #f1f1f1;
+        }
+
+        .btn-update {
+            padding: 5px 10px;
+            background: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn-update:hover {
+            background: #218838;
+        }
+
+        .btn-delete {
+            background: none;
+            border: none;
+            color: #dc3545;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .btn-delete:hover {
+            color: #c82333;
+        }
+
+        .stock-warning {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-    <!-- Sidebar Navigation -->
     <?php include 'sidebar.php'; ?>
 
-    <!-- Main Content -->
     <div class="main-content">
         <div class="header">
             <h1>Manage Food Inventory</h1>
         </div>
 
-        <!-- Add New Food Item Form -->
         <section class="container">
             <h2>Add New Food Item</h2>
             <form method="post">
@@ -105,7 +210,7 @@ $inventoryResult = $conn->query($inventoryQuery);
                     <?php while ($item = $inventoryResult->fetch_assoc()) { ?>
                         <tr>
                             <td><?= htmlspecialchars($item['item_name']) ?></td>
-                            <td <?= $item['stock_quantity'] == 0 ? 'style="color: red; font-weight: bold;"' : '' ?>>
+                            <td class="<?= $item['stock_quantity'] == 0 ? 'stock-warning' : '' ?>">
                                 <?= htmlspecialchars($item['stock_quantity']) ?>
                             </td>
                             <td>
@@ -118,7 +223,9 @@ $inventoryResult = $conn->query($inventoryQuery);
                             <td>
                                 <form method="post" style="display: inline;">
                                     <input type="hidden" name="delete_item_id" value="<?= $item['item_id'] ?>">
-                                    <button type="submit" name="delete_food" class="btn-delete">Delete</button>
+                                    <button type="submit" name="delete_food" class="btn-delete" onclick="return confirm('Are you sure you want to delete this item?');">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 </form>
                             </td>
                         </tr>

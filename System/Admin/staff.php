@@ -178,7 +178,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_order'], $_POS
             <th>Order ID</th>
             <th>Username</th>
             <th>Section</th>
-            <th>Track</th>
+            <th>Track & Room Number</th>
             <th>Order Date</th>
             <th>Total Price</th>
             <th>Order Status</th>

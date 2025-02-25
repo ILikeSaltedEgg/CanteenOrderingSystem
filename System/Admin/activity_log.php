@@ -69,7 +69,6 @@ $total_pages = ceil($total_logs / $logs_per_page);
     <div class="main-content">
         <h1>Activity Log</h1>
 
-        <!-- Search and Filter Form -->
         <div class="search-filter-container">
             <form method="GET">
                 <input type="text" name="search" placeholder="Search username or action" value="<?= htmlspecialchars($search) ?>">
@@ -79,7 +78,6 @@ $total_pages = ceil($total_logs / $logs_per_page);
             </form>
         </div>
 
-        <!-- Log Table -->
         <table>
             <thead>
                 <tr>
@@ -101,7 +99,6 @@ $total_pages = ceil($total_logs / $logs_per_page);
             </tbody>
         </table>
 
-        <!-- Pagination -->
         <div class="pagination">
             <?php if ($page > 1) : ?>
                 <a href="?page=<?= $page - 1 ?>&search=<?= urlencode($search) ?>&filter_date=<?= urlencode($filter_date) ?>">Previous</a>
