@@ -75,7 +75,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 header("Location: verify_2fa.php");
                 exit();
             } else {
-                echo "<script>alert('Welcome, User!'); window.location.href='Research2.php';</script>";
+                echo "<script>alert('Welcome, User!'); window.location.href='index.php';</script>";
             }
         } else {
             logActivity($conn, $user_id, $username, "Failed login attempt");

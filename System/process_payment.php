@@ -47,13 +47,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validate required fields
     if (empty($paymentMethod)) {
         $_SESSION['message'] = "Payment method is required.";
-        header("Location: research2.php");
+        header("Location: index.php");
         exit();
     }
 
     if (empty($totalAmount) || $totalAmount <= 0) {
         $_SESSION['message'] = "Invalid total amount.";
-        header("Location: research2.php");
+        header("Location: index.php");
         exit();
     }
 
@@ -78,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($userResult->num_rows === 0) {
         $_SESSION['message'] = "User not found.";
-        header("Location: research2.php");
+        header("Location: index.php");
         exit();
     }
 
@@ -145,11 +145,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     } else {
         $_SESSION['message'] = "Failed to place the order. Please try again.";
-        header("Location: research2.php");
+        header("Location: index.php");
         exit();
     }
 } else {
-    header("Location: research2.php");
+    header("Location: index.php");
     exit();
 }
 ?>

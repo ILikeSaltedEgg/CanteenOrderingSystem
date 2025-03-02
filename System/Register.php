@@ -40,7 +40,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register"])) {
 
     if ($stmt->execute()) {
         $_SESSION["username"] = $user;
-        echo "<script>alert('Registration successful!'); window.location.href='Research2.php';</script>";
+        echo "<script>alert('Registration successful!'); window.location.href='index.php';</script>";
     } else {
         echo "<script>alert('Registration failed! Please try again.'); window.location.href='Register.php';</script>";
     }
