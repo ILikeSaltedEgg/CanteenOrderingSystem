@@ -24,7 +24,6 @@ The **Online Canteen Ordering System** is a web-based platform designed to strea
 6. Open the project in your browser via `http://localhost/CanteenOrderingSystem/`.  
 
 ## Team Members
-- [Calimlim, Ace Joshua A.]
 - [Tolentino, Ralp Laurence]   
 - [Rosarito, Timothy M.]
 - [Martinez, Rafael Luis N.] 
@@ -37,3 +36,4 @@ This project is for educational purposes only.
 ---
 
 If you have any questions or issues, feel free to reach out!
+
