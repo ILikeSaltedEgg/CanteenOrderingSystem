@@ -59,8 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
 
     if ($stmt->execute()) {
         $order_id = $stmt->insert_id;
-
-        // Insert order items into the database
+
         $insertOrderItemsQuery = "INSERT INTO order_items (order_id, item_name, price, quantity, canteen) VALUES (?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($insertOrderItemsQuery);
 
