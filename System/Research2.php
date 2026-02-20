@@ -51,8 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
     echo "<pre>";
     print_r($cart_items);
     echo "</pre>";
-
-    // Insert the order into the database
+
     $insertOrderQuery = "INSERT INTO orders (email, total_price, order_status, note) VALUES (?, ?, 'pending', ?)";
     $stmt = $conn->prepare($insertOrderQuery);
     $stmt->bind_param("sd", $email, $total_amount);
