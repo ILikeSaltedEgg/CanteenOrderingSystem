@@ -18,7 +18,8 @@ if (isset($_SESSION['email'])) {
 
     if ($result->num_rows > 0) {
         $user_data = $result->fetch_assoc();
-        $username = $user_data['username']; // Fetch username
+        $username = $user_data['username'];
+ username
         $user_track = $user_data['track'];
         $user_section = $user_data['section']; // Fetch section
         $user_contact = $user_data['contact_number']; // Fetch contact number
