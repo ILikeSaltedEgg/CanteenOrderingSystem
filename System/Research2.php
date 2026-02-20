@@ -61,8 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
 
         $insertOrderItemsQuery = "INSERT INTO order_items (order_id, item_name, price, quantity, canteen) VALUES (?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($insertOrderItemsQuery);
-
-        // Prepare the stock update query
+
         $updateStockQuery = "UPDATE food_inventory SET stock_quantity = stock_quantity - ? WHERE item_name = ?";
         $stmtUpdateStock = $conn->prepare($updateStockQuery);
 
