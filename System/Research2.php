@@ -9,8 +9,7 @@ $user_section = "N/A";
 
 if (isset($_SESSION['email'])) { 
     $email = $_SESSION['email'];
-
-    // Fetch username and school_valid status
+
     $query = "SELECT username, track, section, contact_number, school_valid FROM users WHERE email = ?";
     $stmt = $conn->prepare($query);
     $stmt->bind_param("s", $email);
