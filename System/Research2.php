@@ -183,7 +183,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_items'], $_POST[
         <section id="container">
             <div id="menu-items">
 
-                <!-- Menu items here -->
+              
 
                 <div class="menu-item" data-category="meals" data-canteen="Canteen 1">
                     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Adobo_DSCF4391.jpg/1280px-Adobo_DSCF4391.jpg" alt="Chicken Adobo">
