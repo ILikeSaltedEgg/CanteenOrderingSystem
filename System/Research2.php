@@ -27,8 +27,7 @@ if (isset($_SESSION['email'])) {
         die("Error fetching user data: " . mysqli_error($conn));
     }
     $stmt->close();
-
-    // Store the fetched values in session variables
+
     $_SESSION['username'] = $username;
     $_SESSION['track'] = $user_track;
     $_SESSION['section'] = $user_section;
