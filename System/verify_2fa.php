@@ -8,8 +8,7 @@ if (!isset($_SESSION['2fa_user'])) {
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $entered_code = $_POST['verification_code'];
-
-    // Check if the entered code matches the static 2FA code
+
     if ($entered_code == $_SESSION['2fa_code']) {
         // Clear 2FA session data
         unset($_SESSION['2fa_code'], $_SESSION['2fa_user']);
