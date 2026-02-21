@@ -1,7 +1,6 @@
 <?php
 session_start();
-
-// Redirect to login if the user is not authorized for 2FA
+
 if (!isset($_SESSION['2fa_user'])) {
     header("Location: login.php");
     exit();
