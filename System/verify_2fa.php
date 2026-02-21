@@ -12,8 +12,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($entered_code == $_SESSION['2fa_code']) {
         // Clear 2FA session data
         unset($_SESSION['2fa_code'], $_SESSION['2fa_user']);
-
-        // Redirect based on user type
+
         if ($_SESSION['usertype'] == "super_admin") {
             header("Location: ../System/Admin/super_admin.php");
         } elseif ($_SESSION['usertype'] == "staff") {
