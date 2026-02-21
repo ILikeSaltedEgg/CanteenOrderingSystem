@@ -45,7 +45,7 @@
                     <button type="button">Logout</button>
                 </a>
             <?php else: ?>
-                <!-- Show Login Button -->
+               
                 <a href="../Homepage/login.php" id="login-button">
                     <button type="button">Login</button>
                 </a>
