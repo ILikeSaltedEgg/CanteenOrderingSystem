@@ -47,14 +47,11 @@ Canteen administrators get a dedicated dashboard to manage food items, monitor i
 | Layer | Technology |
 |---|---|
 | **Frontend** | React 18, Redux Toolkit, React Router v6 |
-| **Styling** | CSS Modules (custom), DM Sans & DM Mono fonts |
 | **Backend** | Node.js, Express.js |
 | **Database** | Supabase (PostgreSQL) |
-| **Auth** | Supabase Auth (JWT via `supabaseAdmin.auth.getUser`) |
 | **HTTP Client** | Axios (with request/response interceptors) |
 | **File Upload** | Multer |
 | **Notifications** | React Toastify |
-| **Icons** | React Icons (Font Awesome) |
  
 ---
  
