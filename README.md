@@ -62,8 +62,8 @@ Canteen administrators get a dedicated dashboard to manage food items, monitor i
  
 **1. Clone the repository**
 ```bash
-git clone https://github.com/your-username/online-canteen.git
-cd online-canteen
+git clone https://github.com/ILikeSaltedEgg/CanteenOrderingSystem.git
+cd CanteenOrderingSystem
 ```
 **2. Set up the backend**
 ```bash
@@ -109,5 +109,5 @@ This project was developed for **educational purposes** as part of a Grade 12 re
  
 ---
  
-*Built with ❤️ by the Arellano Canteen Team — 2025*
+*Built with ❤️ by ILikeSaltedEgg — 2025*
 
