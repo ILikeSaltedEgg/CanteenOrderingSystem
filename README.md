@@ -94,11 +94,12 @@ The app will be available at `http://localhost:3000`.
  
 | Name | Role |
 |---|---|
-| Tolentino, Ralp Laurence | Full Stack Developer |
-| Rosarito, Timothy M. | Backend Developer |
-| Martinez, Rafael Luis N. | Frontend Developer |
-| Pacoma, Rissalyn | UI/UX & Documentation |
-| Sioson, Aldrin | Database & Testing |
+| Calimlim, Ace Joshua A.| Full Stack Developer, UI/UX & Documentation,  Database & Testing |
+| Tolentino, Ralp Laurence |
+| Rosarito, Timothy M. |
+| Martinez, Rafael Luis N. |
+| Pacoma, Rissalyn |
+| Sioson, Aldrin |
  
 ---
  
