@@ -1,39 +1,126 @@
-# Online Canteen Ordering System
-
-## Project Overview
-The **Online Canteen Ordering System** is a web-based platform designed to streamline the process of ordering food from the school canteen. The system allows students and staff to browse the menu, place orders, and track their purchases efficiently. It was developed as part of our **Grade 12 research project**.
-
-## Technologies Used
-- **Frontend:** HTML, CSS, JavaScript  
-- **Backend:** PHP  
-- **Database:** MySQL (Managed via XAMPP)  
-
-## Features
-- **User Authentication** – Secure login and registration for students and staff.  
-- **Menu Management** – View and manage available canteen items.  
-- **Order Processing** – Users can add items to their cart and place orders.  
-- **Order Tracking** – View order status and history.  
-- **Admin Panel** – Manage orders, users, and menu items.  
-
-## Installation Guide
-1. **Download & Install XAMPP** (if not already installed).  
-2. Clone this repository or download the source code.  
-3. Move the project folder to `htdocs` in the XAMPP directory.  
-4. Import the `au_canteen.sql` file into MySQL using phpMyAdmin.  
-5. Start Apache and MySQL from XAMPP Control Panel.  
-6. Open the project in your browser via `http://localhost/CanteenOrderingSystem/`.  
-
-## Team Members
-- [Tolentino, Ralp Laurence]   
-- [Rosarito, Timothy M.]
-- [Martinez, Rafael Luis N.] 
-- [Pacoma, Rissalyn] 
-- [Sioson, Aldrin] 
-
-## License
-This project is for educational purposes only.  
-
+### Arellano Online Canteen Ordering System (Updated as of March 17, 2026)
+ 
+> A full-stack web application that lets university students order canteen meals online, skip the queue, and pick up their food at a chosen time.
+ 
+Built as a **Grade 12 research project** by a team of five students at Arellano University.
+ 
 ---
-
-If you have any questions or issues, feel free to reach out!
+ 
+## 📌 Table of Contents
+ 
+- [Overview](#overview)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Team](#team)
+- [License](#license)
+ 
+---
+ 
+## Overview
+ 
+The **Arellano Online Canteen Ordering System** replaces the traditional walk-up canteen experience with a modern, browser-based ordering platform. Students log in, browse the daily menu, add items to their cart, select a pickup time, and place their order — all without standing in line.
+ 
+Canteen administrators get a dedicated dashboard to manage food items, monitor incoming orders, and view daily sales summaries in real time.
+ 
+---
+ 
+## Features
+ 
+### Student Side
+- **Authentication** — Secure register and login with role-based access (student / admin)
+- **Menu Browsing** — Browse food items with category filters and search
+- **Cart** — Add, update, and remove items; persisted in the backend
+- **Checkout** — Select a pickup time slot and add special instructions
+- **Order History** — View past orders and their current status
+- **Order Cancellation** — Cancel a pending order before preparation begins
+ 
+### Admin Side
+- **Admin Dashboard** — Clean, dedicated panel with sidebar navigation
+- **Manage Food** — Add, edit, and delete menu items with availability toggle
+- **Manage Orders** — View all orders, filter by status, and update order progress
+- **Daily Orders** — Summary of today's orders with total revenue count
+ 
+---
+ 
+## Tech Stack
+ 
+| Layer | Technology |
+|---|---|
+| **Frontend** | React 18, Redux Toolkit, React Router v6 |
+| **Styling** | CSS Modules (custom), DM Sans & DM Mono fonts |
+| **Backend** | Node.js, Express.js |
+| **Database** | Supabase (PostgreSQL) |
+| **Auth** | Supabase Auth (JWT via `supabaseAdmin.auth.getUser`) |
+| **HTTP Client** | Axios (with request/response interceptors) |
+| **File Upload** | Multer |
+| **Notifications** | React Toastify |
+| **Icons** | React Icons (Font Awesome) |
+ 
+---
+ 
+### Installation
+ 
+**1. Clone the repository**
+```bash
+git clone https://github.com/your-username/online-canteen.git
+cd online-canteen
+```
+ 
+**2. Set up the backend**
+```bash
+cd backend
+npm install
+```
+ 
+Create `backend/.env`:
+```env
+PORT=5000
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_KEY=your-service-role-key
+```
+ 
+Start the backend:
+```bash
+npm run dev
+```
+ 
+**3. Set up the frontend**
+```bash
+cd frontend
+npm install
+```
+ 
+Create `frontend/.env`:
+```env
+REACT_APP_API_URL=http://localhost:5000/api
+```
+ 
+Start the frontend:
+```bash
+npm start
+```
+ 
+The app will be available at `http://localhost:3000`.
+ 
+---
+ 
+## Team
+ 
+| Name | Role |
+|---|---|
+| Tolentino, Ralp Laurence | Full Stack Developer |
+| Rosarito, Timothy M. | Backend Developer |
+| Martinez, Rafael Luis N. | Frontend Developer |
+| Pacoma, Rissalyn | UI/UX & Documentation |
+| Sioson, Aldrin | Database & Testing |
+ 
+---
+ 
+## License
+ 
+This project was developed for **educational purposes** as part of a Grade 12 research requirement at Arellano University. Not intended for commercial use.
+ 
+---
+ 
+*Built with ❤️ by the Arellano Canteen Team — 2025*
 
