@@ -65,18 +65,10 @@ Canteen administrators get a dedicated dashboard to manage food items, monitor i
 git clone https://github.com/your-username/online-canteen.git
 cd online-canteen
 ```
- 
 **2. Set up the backend**
 ```bash
 cd backend
 npm install
-```
- 
-Create `backend/.env`:
-```env
-PORT=5000
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_SERVICE_KEY=your-service-role-key
 ```
  
 Start the backend:
@@ -89,12 +81,6 @@ npm run dev
 cd frontend
 npm install
 ```
- 
-Create `frontend/.env`:
-```env
-REACT_APP_API_URL=http://localhost:5000/api
-```
- 
 Start the frontend:
 ```bash
 npm start
