@@ -1,0 +1,285 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
+ 
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════ */
+:root {
+  --af-cream:        #faf7f2;
+  --af-white:        #fffef9;
+  --af-dark:         #1a1a1a;
+  --af-muted:        #6b6b6b;
+  --af-accent:       #d97706;
+  --af-accent-light: #fef3c7;
+  --af-border:       rgba(0, 0, 0, 0.09);
+  --af-error:        #dc2626;
+  --af-error-light:  #fef2f2;
+  --af-font-display: 'Playfair Display', serif;
+  --af-font-body:    'DM Sans', sans-serif;
+}
+ 
+/* ═══════════════════════════════════════════
+   AUTH CONTAINER  —  full-page, no header/footer
+═══════════════════════════════════════════ */
+.auth-container {
+  font-family: var(--af-font-body);
+  /* FIX: was calc(100vh - 130px) which assumed header+footer.
+     Now it takes the full viewport height since header/footer are hidden. */
+  min-height: 100vh;
+  background: var(--af-cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1.25rem;
+  position: relative;
+  overflow: hidden;
+}
+ 
+/* Ambient background blobs */
+.auth-container::before,
+.auth-container::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.auth-container::before {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, #fde68a40 0%, transparent 70%);
+  top: -100px;
+  right: -80px;
+}
+.auth-container::after {
+  width: 240px;
+  height: 240px;
+  background: radial-gradient(circle, #bbf7d038 0%, transparent 70%);
+  bottom: -50px;
+  left: -50px;
+}
+ 
+/* ═══════════════════════════════════════════
+   BACK TO HOME BUTTON
+═══════════════════════════════════════════ */
+.auth-back-btn {
+  position: absolute;
+  top: 20px;
+  left: 24px;
+  font-family: var(--af-font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--af-muted);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border: 1.5px solid var(--af-border);
+  border-radius: 999px;
+  background-color: var(--af-white);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.2s;
+  z-index: 2;
+}
+ 
+.auth-back-btn:hover {
+  background-color: var(--af-dark);
+  border-color: var(--af-dark);
+  color: #fff;
+  transform: translateX(-2px);
+}
+ 
+/* ═══════════════════════════════════════════
+   AUTH FORM  —  the card
+═══════════════════════════════════════════ */
+.auth-form {
+  background: var(--af-white);
+  border: 1.5px solid var(--af-border);
+  border-radius: 18px;
+  padding: 2.5rem 2.25rem;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.07);
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  animation: af-slideUp 0.45s ease both;
+}
+ 
+/* ── Card header block (logo + title + subtitle) ── */
+.auth-form-header {
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+ 
+/* Logo link — clicking it goes to home */
+.auth-logo-link {
+  display: inline-block;
+  text-decoration: none;
+  transition: transform 0.2s;
+}
+.auth-logo-link:hover {
+  transform: scale(1.15);
+}
+ 
+.auth-form-logo {
+  display: block;
+  font-size: 2.25rem;
+  margin-bottom: 0.65rem;
+  animation: af-pop 0.4s ease both 0.15s;
+}
+.auth-form h2 {
+  font-family: var(--af-font-display);
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--af-dark);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin: 0 0 0.25rem;
+}
+.auth-form-header p {
+  font-size: 0.875rem;
+  color: var(--af-muted);
+  margin: 0;
+}
+ 
+/* ═══════════════════════════════════════════
+   FORM GROUP  —  label + input pair
+═══════════════════════════════════════════ */
+.auth-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  animation: af-fadeUp 0.4s ease both;
+}
+.auth-form .form-group:nth-child(2) { animation-delay: 0.05s; }
+.auth-form .form-group:nth-child(3) { animation-delay: 0.10s; }
+.auth-form .form-group:nth-child(4) { animation-delay: 0.15s; }
+.auth-form .form-group:nth-child(5) { animation-delay: 0.20s; }
+ 
+/* ── Label ── */
+.auth-form .form-group label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--af-dark);
+  letter-spacing: 0.02em;
+  margin-bottom: 0;
+}
+ 
+/* ── Input ── */
+.auth-form .form-group input {
+  width: 100%;
+  padding: 0.72rem 1rem;
+  background: var(--af-cream);
+  border: 1.5px solid var(--af-border);
+  border-radius: 10px;
+  font-family: var(--af-font-body);
+  font-size: 0.92rem;
+  color: var(--af-dark);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  box-sizing: border-box;
+}
+.auth-form .form-group input::placeholder {
+  color: #bbb;
+}
+.auth-form .form-group input:focus {
+  border-color: var(--af-accent);
+  box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.1);
+  background: var(--af-white);
+}
+ 
+/* Error state on confirm password mismatch */
+.auth-form .form-group input.input-error {
+  border-color: var(--af-error);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.08);
+}
+ 
+/* ═══════════════════════════════════════════
+   SUBMIT BUTTON
+═══════════════════════════════════════════ */
+.auth-form button[type='submit'] {
+  width: 100%;
+  padding: 0.82rem 1.5rem;
+  background: var(--af-dark);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  font-family: var(--af-font-body);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 0.25rem;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  animation: af-fadeUp 0.4s ease both 0.25s;
+}
+.auth-form button[type='submit']:hover:not(:disabled) {
+  background: var(--af-accent);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(217, 119, 6, 0.3);
+}
+.auth-form button[type='submit']:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+ 
+/* ═══════════════════════════════════════════
+   FOOTER TEXT  ("Don't have an account?")
+═══════════════════════════════════════════ */
+.auth-form > p {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--af-muted);
+  margin: 0.25rem 0 0;
+}
+.auth-form > p a {
+  color: var(--af-accent);
+  font-weight: 500;
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+.auth-form > p a:hover {
+  opacity: 0.75;
+  text-decoration: underline;
+}
+ 
+/* ═══════════════════════════════════════════
+   KEYFRAMES
+═══════════════════════════════════════════ */
+@keyframes af-slideUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes af-fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes af-pop {
+  0%   { transform: scale(0.5); opacity: 0; }
+  70%  { transform: scale(1.18); }
+  100% { transform: scale(1);   opacity: 1; }
+}
+ 
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════ */
+@media (max-width: 480px) {
+  .auth-form {
+    padding: 2rem 1.4rem;
+    border-radius: 14px;
+  }
+  .auth-form h2 {
+    font-size: 1.5rem;
+  }
+  .auth-back-btn {
+    top: 14px;
+    left: 14px;
+    font-size: 12px;
+    padding: 6px 11px;
+  }
+}
