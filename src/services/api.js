@@ -7,7 +7,6 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
  
-// ── Attach token on every request ──────────────────────────
 api.interceptors.request.use(
   (config) => {
     const user = JSON.parse(localStorage.getItem('user'));
@@ -19,14 +18,11 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
  
-// ── Auto-logout on 401 (expired / invalid token) ───────────
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Clear stale user data and force re-login
       localStorage.removeItem('user');
-      // Only redirect if not already on an auth page
       if (!window.location.pathname.includes('/login') &&
           !window.location.pathname.includes('/register')) {
         window.location.href = '/login';
