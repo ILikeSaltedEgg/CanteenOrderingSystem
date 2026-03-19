@@ -26,7 +26,6 @@ const Header = () => {
         <nav>
           <ul>
             {userInfo ? (
-              /* ── LOGGED IN ──────────────────────── */
               <>
                 <li>
                   <Link to="/menu">Menu</Link>
@@ -56,7 +55,6 @@ const Header = () => {
                 </li>
               </>
             ) : (
-              /* ── NOT LOGGED IN ──────────────────── */
               <>
                 <li><Link to="/menu">Menu</Link></li>
                 <li><Link to="/login">Login</Link></li>
