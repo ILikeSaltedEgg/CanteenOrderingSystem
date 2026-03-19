@@ -24,7 +24,6 @@ const DailyOrders = () => {
  
   if (isLoading) return <Loader />;
  
-  // Supabase returns: total_amount, pickup_time, users(name), order_items or items
   const orders = dailyOrders.orders ?? [];
  
   return (
@@ -78,8 +77,6 @@ const DailyOrders = () => {
                   const total    = order.total_amount ?? order.totalAmount ?? 0;
                   const pickup   = order.pickup_time  ?? order.pickupTime;
                   const userName = order.users?.name  ?? order.user?.name ?? '—';
-                  // adminController selects '*, users(name)' but NOT order_items for daily
-                  // items may be undefined here — show a dash if so
                   const items    = order.order_items ?? order.items ?? [];
  
                   return (
