@@ -20,7 +20,6 @@ const CartItem = ({ item }) => {
   return (
     <div className="cart-item">
  
-      {/* Image or placeholder */}
       <div className="cart-item-img">
         {item.image ? (
           <img src={item.image} alt={item.name} />
@@ -29,25 +28,21 @@ const CartItem = ({ item }) => {
         )}
       </div>
  
-      {/* Info */}
       <div className="cart-item-info">
         <h4 className="cart-item-name">{item.name}</h4>
         <p className="cart-item-price">₱{Number(item.price).toFixed(2)} each</p>
       </div>
  
-      {/* Quantity controls */}
       <div className="cart-item-qty">
         <button className="qty-btn" onClick={decrement}>−</button>
         <span className="qty-value">{item.quantity}</span>
         <button className="qty-btn" onClick={increment}>+</button>
       </div>
  
-      {/* Line total */}
       <div className="cart-item-total">
         ₱{(Number(item.price) * item.quantity).toFixed(2)}
       </div>
  
-      {/* Remove */}
       <button
         className="cart-item-remove"
         onClick={() => dispatch(removeFromCart(item.foodId))}
