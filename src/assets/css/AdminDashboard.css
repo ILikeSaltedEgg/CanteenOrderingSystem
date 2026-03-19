@@ -330,20 +330,12 @@ html, body {
   font-size: 14px;
 }
  
-/* =============================================
-   CONTENT AREA
-   ============================================= */
- 
 .admin-content {
   flex: 1;
   padding: 24px 28px;
   background-color: var(--bg);
   overflow-y: auto;
 }
- 
-/* =============================================
-   PAGE HEADER
-   ============================================= */
  
 .page-header {
   display: flex;
@@ -364,11 +356,7 @@ html, body {
   color: var(--muted);
   margin-top: 2px;
 }
- 
-/* =============================================
-   STAT CARDS
-   ============================================= */
- 
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -429,10 +417,6 @@ html, body {
   opacity: 0.06;
 }
  
-/* =============================================
-   PANELS
-   ============================================= */
- 
 .panel {
   background-color: var(--white);
   border: 1px solid var(--border-light);
@@ -457,10 +441,6 @@ html, body {
  
 .panel-body { padding: 18px; }
  
-/* =============================================
-   GRID HELPERS
-   ============================================= */
- 
 .two-col-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -474,10 +454,6 @@ html, body {
   gap: 14px;
   margin-bottom: 14px;
 }
- 
-/* =============================================
-   TABLES
-   ============================================= */
  
 .table-wrapper { overflow-x: auto; }
  
