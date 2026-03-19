@@ -74,7 +74,6 @@ const ManageFood = () => {
                 </tr>
               ) : (
                 foods.map((food) => {
-                  // Supabase uses `id`, not `_id`
                   const foodId        = food.id ?? food._id;
                   const isAvailable   = food.is_available ?? food.isAvailable;
  
