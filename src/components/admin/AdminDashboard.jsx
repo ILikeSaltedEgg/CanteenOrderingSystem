@@ -16,8 +16,7 @@ const AdminDashboard = () => {
  
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
- 
-  // Close dropdown on outside click
+
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -52,8 +51,7 @@ const AdminDashboard = () => {
  
   return (
     <div className="admin-dashboard">
- 
-      {/* ── SIDEBAR ─────────────────────────── */}
+
       <aside className="sidebar">
         <div className="sidebar-brand">
           <div className="sidebar-brand-icon">🍽️</div>
@@ -87,17 +85,14 @@ const AdminDashboard = () => {
           </li>
         </ul>
       </aside>
- 
-      {/* ── MAIN ────────────────────────────── */}
+
       <div className="admin-main">
  
-        {/* TOPBAR */}
         <header className="admin-topbar">
           <div className="topbar-page-title">{pageTitle()}</div>
  
           <div className="topbar-actions">
  
-            {/* User dropdown */}
             <div className="topbar-user-wrap" ref={dropdownRef}>
               <div
                 className={`topbar-user ${dropdownOpen ? 'open' : ''}`}
@@ -144,7 +139,6 @@ const AdminDashboard = () => {
           </div>
         </header>
  
-        {/* CONTENT */}
         <main className="admin-content">
           <Routes>
             <Route
