@@ -16,8 +16,6 @@ const FoodForm = ({ food, onClose }) => {
  
   useEffect(() => {
     if (food) {
-      // Supabase returns snake_case columns (is_available, not isAvailable).
-      // We map them into the camelCase form state so inputs are never undefined.
       setFormData({
         name:        food.name        ?? '',
         description: food.description ?? '',
@@ -40,7 +38,6 @@ const FoodForm = ({ food, onClose }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (food) {
-      // Use food.id (Supabase) with fallback to food._id (legacy)
       dispatch(updateFood({ id: food.id ?? food._id, foodData: formData }));
     } else {
       dispatch(createFood(formData));
