@@ -72,7 +72,6 @@ const foodSlice = createSlice({
       .addCase(createFood.fulfilled, (state, action) => {
         state.foods.push(action.payload);
       })
-      // updateFood
       .addCase(updateFood.fulfilled, (state, action) => {
         const index = state.foods.findIndex((f) => f._id === action.payload._id);
         if (index !== -1) state.foods[index] = action.payload;
