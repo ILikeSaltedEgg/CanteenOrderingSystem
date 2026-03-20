@@ -58,7 +58,6 @@ const foodSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      // fetchFoods
       .addCase(fetchFoods.pending, (state) => {
         state.isLoading = true;
       })
