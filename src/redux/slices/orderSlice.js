@@ -71,7 +71,7 @@ const orderSlice = createSlice({
       })
       .addCase(placeOrder.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.lastOrder = action.payload;   // ← save so CheckoutPage won't redirect
+        state.lastOrder = action.payload;   
         state.orders.push(action.payload);
       })
       .addCase(placeOrder.rejected, (state, action) => {
@@ -99,7 +99,6 @@ const orderSlice = createSlice({
         state.isLoading = false;
         state.error     = action.payload;
       })
-      // fetchDailyOrders
       .addCase(fetchDailyOrders.pending,   (state)         => { state.isLoading = true; })
       .addCase(fetchDailyOrders.fulfilled, (state, action) => {
         state.isLoading  = false;
@@ -109,7 +108,6 @@ const orderSlice = createSlice({
         state.isLoading = false;
         state.error     = action.payload;
       })
-      // updateOrderStatus
       .addCase(updateOrderStatus.fulfilled, (state, action) => {
         const updated   = action.payload;
         const updatedId = updated.id ?? updated._id;
