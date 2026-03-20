@@ -69,7 +69,6 @@ const foodSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
       })
-      // createFood
       .addCase(createFood.fulfilled, (state, action) => {
         state.foods.push(action.payload);
       })
