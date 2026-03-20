@@ -4,7 +4,7 @@ import orderService from '../../services/orderService';
 const initialState = {
   orders:      [],
   dailyOrders: { orders: [], totalOrders: 0, totalRevenue: 0 },
-  lastOrder:   null,   // ← stores the most recently placed order
+  lastOrder:   null,  
   isLoading:   false,
   error:       null,
 };
@@ -59,7 +59,6 @@ const orderSlice = createSlice({
   name: 'order',
   initialState,
   reducers: {
-    // Call this when the user leaves the success screen
     clearLastOrder: (state) => {
       state.lastOrder = null;
     },
