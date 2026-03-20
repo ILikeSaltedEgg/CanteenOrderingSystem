@@ -76,7 +76,6 @@ const foodSlice = createSlice({
         const index = state.foods.findIndex((f) => f._id === action.payload._id);
         if (index !== -1) state.foods[index] = action.payload;
       })
-      // deleteFood
       .addCase(deleteFood.fulfilled, (state, action) => {
         state.foods = state.foods.filter((f) => f._id !== action.payload);
       });
