@@ -20,7 +20,6 @@ const HomePage = () => {
   const { userInfo } = useSelector((state) => state.auth);
   const heroRef = useRef(null);
  
-  // ── ALL HOOKS FIRST — before any early return ──────────────
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => entries.forEach((e) => e.isIntersecting && e.target.classList.add('visible')),
@@ -30,7 +29,6 @@ const HomePage = () => {
     return () => observer.disconnect();
   }, []);
  
-  // ── EARLY RETURN after all hooks ──────────────────────────
   // Logged-in students skip the landing page and go straight to menu
   if (userInfo && userInfo.role !== 'admin') {
     return <Navigate to="/menu" replace />;
@@ -39,7 +37,6 @@ const HomePage = () => {
   return (
     <div className="hp-wrapper">
  
-      {/* ── HERO ── */}
       <section className="hp-hero" ref={heroRef}>
         <div className="hp-blob hp-blob-1" />
         <div className="hp-blob hp-blob-2" />
@@ -60,8 +57,7 @@ const HomePage = () => {
         <div className="hp-scroll-cue">scroll</div>
       </section>
  
-      {/* ── CATEGORIES ── */}
-      <div className="hp-section">
+     <div className="hp-section">
         <p className="hp-eyebrow reveal">What's available</p>
         <h2 className="hp-heading reveal">Browse by category</h2>
         <div className="hp-cats">
@@ -79,7 +75,6 @@ const HomePage = () => {
         </div>
       </div>
  
-      {/* ── FEATURES ── */}
       <div className="hp-section" style={{ paddingTop: 0 }}>
         <p className="hp-eyebrow reveal">Why order online</p>
         <h2 className="hp-heading reveal">Built for busy students</h2>
