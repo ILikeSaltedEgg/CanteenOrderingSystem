@@ -93,8 +93,7 @@ const HomePage = () => {
         </div>
       </div>
  
-      {/* ── CTA BANNER ── */}
-      <div className="hp-banner reveal">
+     <div className="hp-banner reveal">
         <h2>Hungry? Let's go. 🍴</h2>
         <p>Check today's menu and place your order in under a minute.</p>
         <Link to="/menu" className="hp-btn-amber">See Today's Menu →</Link>
