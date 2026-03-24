@@ -2,7 +2,7 @@
  
 > A full-stack web application that lets university students order canteen meals online, skip the queue, and pick up their food at a chosen time.
  
-Built as a **Grade 12 research project** by a team of five students at Arellano University.
+Built as a **Grade 12 research project** by a students of Arellano University.
  
 ---
  
