@@ -1,4 +1,4 @@
-### Arellano Online Canteen Ordering System (Updated as of March 17, 2026)
+### Arellano University Online Canteen Ordering System (Updated as of March 24, 2026)
  
 > A full-stack web application that lets university students order canteen meals online, skip the queue, and pick up their food at a chosen time.
  
@@ -18,7 +18,7 @@ Built as a **Grade 12 research project** by a team of five students at Arellano 
  
 ## Overview
  
-The **Arellano Online Canteen Ordering System** replaces the traditional walk-up canteen experience with a modern, browser-based ordering platform. Students log in, browse the daily menu, add items to their cart, select a pickup time, and place their order — all without standing in line.
+The **Arellano Online Canteen Ordering System** replaces the traditional walk-up canteen experience with a modern, browser-based ordering platform. Students log in, browse the daily menu, add items to their cart, select a pickup time, and place their order, all in without standing in line.
  
 Canteen administrators get a dedicated dashboard to manage food items, monitor incoming orders, and view daily sales summaries in real time.
  
