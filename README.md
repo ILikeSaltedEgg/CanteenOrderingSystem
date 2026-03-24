@@ -59,8 +59,8 @@ Canteen administrators get a dedicated dashboard to manage food items, monitor i
  
 **1. Clone the repository**
 ```bash
-git clone https://github.com/ILikeSaltedEgg/CanteenOrderingSystem.git
-cd CanteenOrderingSystem
+git clone https://github.com/ILikeSaltedEgg/AU-Canteen-System.git
+cd AU-Canteen-System
 ```
 **2. Set up the backend**
 ```bash
