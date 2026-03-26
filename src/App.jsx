@@ -15,9 +15,8 @@ import NotFoundPage from './pages/NotFoundPage';
 function App() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
-  const isAuthRoute = ['/login', '/register'].includes(location.pathname);
 
-  const hideLayout = isAdminRoute || isAuthRoute;
+  const hideLayout = isAdminRoute;
  
   return (
     <div className="app">
