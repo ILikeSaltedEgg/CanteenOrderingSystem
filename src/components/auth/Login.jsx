@@ -17,7 +17,6 @@ const Login = () => {
  
   useEffect(() => {
     if (userInfo) {
-      // Admin → admin dashboard, students → menu page directly
       navigate(userInfo.role === 'admin' ? '/admin' : '/menu');
     }
   }, [userInfo, navigate]);
@@ -32,53 +31,72 @@ const Login = () => {
   };
  
   return (
-    <div className="auth-container">
+    <div className="auth-page-wrap">
+      <div className="auth-login-card">
  
-      <Link to="/" className="auth-back-btn">
-        ← Back to Home
-      </Link>
+        {/* ── LEFT: Form ── */}
+        <div className="auth-login-form-side">
+          <form onSubmit={submitHandler} className="auth-form">
  
-      <form onSubmit={submitHandler} className="auth-form">
+            <h2 className="auth-form-title">Welcome back.</h2>
+            <p className="auth-form-subtitle">
+              Access your curated university dining experience.
+            </p>
  
-        <div className="auth-form-header">
-          <Link to="/" className="auth-logo-link">
-            <span className="auth-form-logo">🍱</span>
-          </Link>
-          <h2>Welcome back</h2>
-          <p>Sign in to your canteen account</p>
+            {/* Email */}
+            <div className="form-group">
+              <label>University Email</label>
+              <input
+                type="email"
+                placeholder="name@university.edu"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+ 
+            {/* Password with Forgot? */}
+            <div className="form-group">
+              <div className="auth-label-row">
+                <label>Password</label>
+                <a href="#forgot" className="auth-forgot-link">Forgot?</a>
+              </div>
+              <input
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+ 
+            <button type="submit" disabled={isLoading}>
+              {isLoading ? <Loader /> : 'Sign In'}
+            </button>
+ 
+            <p className="auth-footer-text">
+              Dont have an account? <Link to="/register">Create one</Link>
+            </p>
+ 
+          </form>
         </div>
  
-        <div className="form-group">
-          <label>Email</label>
-          <input
-            type="email"
-            placeholder="you@university.edu"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+        {/* ── RIGHT: Greyscale image grid ── */}
+        <div className="auth-login-img-side">
+          {/*
+            Drop in real images here when available, e.g.:
+            <img src="/images/canteen-hall.jpg" alt="" />
+            <img src="/images/canteen-food.jpg" alt="" />
+            <img src="/images/canteen-counter.jpg" alt="" />
+ 
+            Until then we use tonal placeholder tiles:
+          */}
+          <div className="auth-img-tile" />
+          <div className="auth-img-tile" style={{ gridColumn: '1' }} />
+          <div className="auth-img-tile" style={{ gridColumn: '2' }} />
         </div>
  
-        <div className="form-group">
-          <label>Password</label>
-          <input
-            type="password"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
- 
-        <button type="submit" disabled={isLoading}>
-          {isLoading ? <Loader /> : 'Sign In →'}
-        </button>
- 
-        <p>
-          Don't have an account? <Link to="/register">Create one</Link>
-        </p>
- 
-      </form>
+      </div>
     </div>
   );
 };
