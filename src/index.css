@@ -366,9 +366,6 @@ button {
 button:hover   { opacity: 0.85; }
 button:disabled { background: #ccc; cursor: not-allowed; }
  
-/* ─────────────────────────────────────────────
-   FOOD LIST
-───────────────────────────────────────────── */
 .food-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -396,10 +393,7 @@ button:disabled { background: #ccc; cursor: not-allowed; }
   font-weight: bold;
   color: #28a745;
 }
- 
-/* ─────────────────────────────────────────────
-   CART
-───────────────────────────────────────────── */
+
 .cart {
   display: grid;
   grid-template-columns: 2fr 1fr;
