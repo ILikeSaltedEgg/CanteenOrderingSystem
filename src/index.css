@@ -107,8 +107,7 @@ nav ul li { margin: 0; }
   gap: 0.75rem;
   flex-shrink: 0;
 }
- 
-/* Login text link */
+
 .header-login-link {
   color: #6b6b6b;
   text-decoration: none;
@@ -119,8 +118,7 @@ nav ul li { margin: 0; }
   padding: 0.35rem 0.5rem;
 }
 .header-login-link:hover { color: #0f1923; }
- 
-/* Register pill button */
+
 .btn-register {
   background: #0f1923;
   color: #fff;
@@ -139,8 +137,7 @@ nav ul li { margin: 0; }
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
- 
-/* Cart icon link */
+
 .header-cart-link {
   position: relative;
   display: flex;
