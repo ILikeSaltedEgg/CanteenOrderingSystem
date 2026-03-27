@@ -71,8 +71,7 @@ nav ul {
 }
  
 nav ul li { margin: 0; }
- 
-/* Base nav link */
+
 .nav-link {
   display: inline-block;
   color: #6b6b6b;
@@ -87,7 +86,6 @@ nav ul li { margin: 0; }
 }
 .nav-link:hover { color: #0f1923; }
  
-/* Active nav link — underline style matching screenshot */
 .nav-link--active {
   color: #0f1923;
   font-weight: 600;
@@ -103,7 +101,6 @@ nav ul li { margin: 0; }
   border-radius: 1px;
 }
  
-/* ── Right action area ── */
 .header-actions {
   display: flex;
   align-items: center;
