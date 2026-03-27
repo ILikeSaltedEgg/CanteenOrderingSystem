@@ -411,10 +411,7 @@ button:disabled { background: #ccc; cursor: not-allowed; }
 .item-actions button {
   margin: 0 0.25rem;
 }
- 
-/* ─────────────────────────────────────────────
-   ADMIN
-───────────────────────────────────────────── */
+
 .admin-dashboard {
   display: grid;
   grid-template-columns: 200px 1fr;
@@ -434,10 +431,7 @@ button:disabled { background: #ccc; cursor: not-allowed; }
   transition: background 0.2s;
 }
 .sidebar a:hover { background: #e8e4dc; }
- 
-/* ─────────────────────────────────────────────
-   MODAL
-───────────────────────────────────────────── */
+
 .modal {
   position: fixed;
   top: 0;
@@ -467,17 +461,11 @@ button:disabled { background: #ccc; cursor: not-allowed; }
   margin-top: 1rem;
 }
  
-/* ─────────────────────────────────────────────
-   UTILITIES
-───────────────────────────────────────────── */
 @keyframes spin {
   0%   { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
  
-/* ─────────────────────────────────────────────
-   RESPONSIVE
-───────────────────────────────────────────── */
 @media (max-width: 768px) {
   .container { padding: 0 1.25rem; }
  
