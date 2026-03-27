@@ -18,10 +18,7 @@ body {
   margin: 0 auto;
   padding: 0 2.5rem;
 }
- 
-/* ─────────────────────────────────────────────
-   HEADER  — editorial style
-───────────────────────────────────────────── */
+
 .header {
   background: #ffffff;
   padding: 0;
@@ -37,8 +34,6 @@ body {
   height: 70px;
   gap: 0;
 }
- 
-/* ── Logo ── */
 .logo {
   display: flex;
   align-items: center;
@@ -60,8 +55,6 @@ body {
   letter-spacing: -0.01em;
   white-space: nowrap;
 }
- 
-/* ── Nav (centre) ── */
 nav {
   flex: 1;
   display: flex;
