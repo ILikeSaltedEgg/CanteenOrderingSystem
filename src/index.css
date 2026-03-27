@@ -169,8 +169,7 @@ nav ul li { margin: 0; }
   justify-content: center;
   border: 1.5px solid #fff;
 }
- 
-/* ── Avatar button — blue outline circle ── */
+
 .header-avatar-wrap {
   position: relative;
 }
@@ -197,8 +196,7 @@ nav ul li { margin: 0; }
   background: #e8ecf5;
   opacity: 1;
 }
- 
-/* ── Avatar dropdown ── */
+
 .header-dropdown {
   position: absolute;
   top: calc(100% + 10px);
@@ -264,9 +262,6 @@ nav ul li { margin: 0; }
 .header-dropdown-logout { color: #cc0000; }
 .header-dropdown-logout:hover { background: #fff5f5; }
  
-/* ─────────────────────────────────────────────
-   MAIN CONTENT
-───────────────────────────────────────────── */
 .main-content {
   min-height: calc(100vh - 70px);   
   padding: 0;                        
