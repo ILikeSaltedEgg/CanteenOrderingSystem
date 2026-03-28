@@ -39,8 +39,7 @@ const Register = () => {
   return (
     <div className="auth-page-wrap">
       <div className="auth-register-card">
- 
-        {/* ── LEFT: Dark editorial panel ── */}
+ 
         <div className="auth-register-panel">
           {/*
             Optional background image — uncomment when you have one:
