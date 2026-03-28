@@ -56,8 +56,7 @@ const Register = () => {
             </p>
           </div>
         </div>
- 
-        {/* ── RIGHT: Form ── */}
+ 
         <div className="auth-register-form-side">
           <form onSubmit={submitHandler} className="auth-form">
  
