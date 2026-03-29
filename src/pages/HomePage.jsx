@@ -31,8 +31,7 @@ const HomePage = () => {
     document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, []);
- 
-  // ── EARLY RETURN after all hooks ──────────────────────────
+ 
   if (userInfo && userInfo.role !== 'admin') {
     return <Navigate to="/menu" replace />;
   }
