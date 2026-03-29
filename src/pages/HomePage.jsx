@@ -22,8 +22,7 @@ const categories = [
 const HomePage = () => {
   const { userInfo } = useSelector((state) => state.auth);
   const heroRef = useRef(null);
- 
-  // ── ALL HOOKS FIRST — before any early return ──────────────
+ 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => entries.forEach((e) => e.isIntersecting && e.target.classList.add('visible')),
